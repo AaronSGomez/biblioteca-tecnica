@@ -2,33 +2,33 @@
 
 Biblioteca de documentos técnicos útiles para la programación, arquitectura, infraestructura, seguridad perimetral, microservicios y facturación electrónica (VeriFactu / NovaPay), desarrollada a partir de la experimentación en servidores caseros con **Raspberry Pi 5**.
 
-El proyecto presenta un diseño unificado de manual técnico interactivo, responsivo y enriquecido con diagramas, simuladores y explicaciones detalladas sin perder rigor técnico.
+🌐 **Sitio web publicado en GitHub Pages**: [https://aaronsgomez.github.io/biblioteca-tecnica/](https://aaronsgomez.github.io/biblioteca-tecnica/)
 
 ---
 
 ## 📚 Estructura y Contenidos
 
-El repositorio consta de un portal de inicio en [`index.html`](./index.html) y siete manuales técnicos interactivos en el directorio [`docs/`](./docs/):
+El portal de inicio está publicado en [aaronsgomez.github.io/biblioteca-tecnica](https://aaronsgomez.github.io/biblioteca-tecnica/) y cuenta con siete manuales técnicos interactivos:
 
-1. **🏛️ [VeriFactu INFO](./docs/verifactu.html)**  
+1. **🏛️ [VeriFactu INFO](https://aaronsgomez.github.io/biblioteca-tecnica/docs/verifactu.html)**  
    Guía interactiva sobre integración con la Agencia Tributaria (AEAT), arquitectura del sobre SOAP/XML, firma digital X.509, encadenamiento SHA-256 de registros de facturación y exploración de librerías en Dart/Flutter.
 
-2. **⚙️ [Informe Backend NovaPay](./docs/springbootAPI.html)**  
+2. **⚙️ [Informe Backend NovaPay](https://aaronsgomez.github.io/biblioteca-tecnica/docs/springbootAPI.html)**  
    Arquitectura REST del núcleo fiscal NovaPay, controlador de enrutamiento regional (Bizkaia/Batuz, Araba/TicketBAI, Gipuzkoa y AEAT), gestión de colas de reintento con Exponential Backoff y persistencia en SQL.
 
-3. **☕ [Arquitectura Spring Boot](./docs/springboot.html)**  
+3. **☕ [Arquitectura Spring Boot](https://aaronsgomez.github.io/biblioteca-tecnica/docs/springboot.html)**  
    Diseño del middleware intermedio en Java 17 / Spring Boot para la traducción transparente de JSON a sobres XML/SOAP firmados mediante compilación WSDL-to-POJO (`jaxb2-maven-plugin`).
 
-4. **📦 [Odoo Dockerizado](./docs/dokerizacion.html)**  
+4. **📦 [Odoo Dockerizado](https://aaronsgomez.github.io/biblioteca-tecnica/docs/dokerizacion.html)**  
    Despliegue ERP Odoo 16 en contenedores Docker, volúmenes de persistencia para PostgreSQL (`pgdata` y `odoo-web-data`), redes aisladas en Docker Compose y configuración de proxy inverso Apache.
 
-5. **🌐 [Multi-dominio y SSL](./docs/duckdnsyssl.html)**  
+5. **🌐 [Multi-dominio y SSL](https://aaronsgomez.github.io/biblioteca-tecnica/docs/duckdnsyssl.html)**  
    Infraestructura de dominios dinámicos con DuckDNS, automatización de scripts de actualización de IP pública, directiva VirtualHost en Apache y renovación de certificados TLS con Certbot / Let's Encrypt.
 
-6. **🛡️ [Búnker Nginx](./docs/nginx.html)**  
+6. **🛡️ [Búnker Nginx](https://aaronsgomez.github.io/biblioteca-tecnica/docs/nginx.html)**  
    Proxy inverso perimetral con modelo de seguridad Zero Trust, límite de peticiones (`limit_req_zone`), ajuste de timeouts (`client_body_timeout`), prevención de buffer overflow y cabeceras de hardening (HSTS, CSP, X-Frame-Options).
 
-7. **🔒 [CrowdSec y Firewall Bouncer](./docs/securefirewall.html)**  
+7. **🔒 [CrowdSec y Firewall Bouncer](https://aaronsgomez.github.io/biblioteca-tecnica/docs/securefirewall.html)**  
    Sistema de Prevención de Intrusiones (IPS) adaptativo basado en análisis de logs en tiempo real, comunicación con CrowdSec LAPI y bouncer `cs-firewall-bouncer` para descarte directo de amenazas a nivel de kernel mediante `iptables`.
 
 ---
@@ -46,8 +46,8 @@ El repositorio consta de un portal de inicio en [`index.html`](./index.html) y s
 
 ## 💻 Despliegue y Visualización
 
-El proyecto está construido completamente con **HTML5, CSS3 y JavaScript ES6+ (Vanilla)**.
-- Puede alojarse directamente en **GitHub Pages**, Nginx, Apache o cualquier servidor web estático.
+- **Publicación activa**: [https://aaronsgomez.github.io/biblioteca-tecnica/](https://aaronsgomez.github.io/biblioteca-tecnica/) (Desplegado en **GitHub Pages**).
+- El proyecto está construido completamente con **HTML5, CSS3 y JavaScript ES6+ (Vanilla)**.
 - No requiere dependencias de backend en ejecución (PHP, Node.js ni bases de datos activas).
 - Las librerías de soporte (como Chart.js) se cargan desde CDNs oficiales mediante HTTPS.
 
