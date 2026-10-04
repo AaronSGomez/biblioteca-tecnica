@@ -12,7 +12,7 @@
 
 <div class="document-page">
 
-    <h1>GuÃ­a Paso a Paso: BÃºnker de Seguridad con Nginx y Docker</h1>
+    <h1>Guía Paso a Paso: Búnker de Seguridad con Nginx y Docker</h1>
     <p>
         <span class="badge">Nginx</span>
         <span class="badge">Docker Compose</span>
@@ -21,14 +21,14 @@
     </p>
 
     <div class="note">
-        <strong>Objetivo de esta guÃ­a:</strong> Documentar la arquitectura de defensa perimetral para aislar un backend del acceso pÃºblico. Se aplican polÃ­ticas de restricciÃ³n mÃ¡xima (Zero Trust y MÃ­nimo Privilegio) limitando drÃ¡sticamente el tamaÃ±o de las peticiones, mitigando ataques DDoS y auditando el trÃ¡fico mediante un proxy inverso Nginx contenedorizado.
+        <strong>Objetivo de esta guía:</strong> Documentar la arquitectura de defensa perimetral para aislar un backend del acceso público. Se aplican políticas de restricción máxima (Zero Trust y Mínimo Privilegio) limitando drásticamente el tamaño de las peticiones, mitigando ataques DDoS y auditando el tráfico mediante un proxy inverso Nginx contenedorizado.
     </div>
 
     <h2>1. Entendiendo la Arquitectura de Aislamiento</h2>
-    <p>La seguridad real empieza por la arquitectura fÃ­sica de la red. En lugar de exponer la base de datos o la aplicaciÃ³n directamente a internet, creamos capas de protecciÃ³n sucesivas (Arquitectura de Defensa en Profundidad).</p>
+    <p>La seguridad real empieza por la arquitectura física de la red. En lugar de exponer la base de datos o la aplicación directamente a internet, creamos capas de protección sucesivas (Arquitectura de Defensa en Profundidad).</p>
     
     <div class="warning">
-        <strong>Concepto Clave:</strong> El Backend y la Base de Datos se ejecutan en una red privada virtual de Docker (<code>secure_net</code>). No tienen puertos expuestos al servidor fÃ­sico host. El Ãºnico que puede comunicarse con ellos es Nginx, y Nginx solo acepta peticiones que vengan del proxy principal (Apache) a nivel local.
+        <strong>Concepto Clave:</strong> El Backend y la Base de Datos se ejecutan en una red privada virtual de Docker (<code>secure_net</code>). No tienen puertos expuestos al servidor físico host. El único que puede comunicarse con ellos es Nginx, y Nginx solo acepta peticiones que vengan del proxy principal (Apache) a nivel local.
     </div>
     
     <div class="mermaid">
@@ -50,10 +50,10 @@
         style DB fill:#bbdefb,stroke:#1976d2,stroke-width:2px
     </div>
 
-    <h2>2. Aislamiento FÃ­sico (Docker Compose)</h2>
-    <p>El primer paso es configurar nuestro entorno de contenedores para cortar el acceso directo al backend y establecer a Nginx como el Ãºnico embudo de entrada.</p>
+    <h2>2. Aislamiento Físico (Docker Compose)</h2>
+    <p>El primer paso es configurar nuestro entorno de contenedores para cortar el acceso directo al backend y establecer a Nginx como el único embudo de entrada.</p>
 
-    <div class="file-header">ðŸ“„ docker-compose.yml</div>
+    <div class="file-header">📄 docker-compose.yml</div>
     <div class="file-content">services:
   api_backend:
     build: .
@@ -67,7 +67,7 @@
     image: nginx:alpine
     container_name: app_nginx
     ports:
-      # RESTRICCIÃ“N MÃXIMA: Nginx expone su puerto 80 SOLO al localhost (127.0.0.1)
+      # RESTRICCIÓN MÁXIMA: Nginx expone su puerto 80 SOLO al localhost (127.0.0.1)
       - "127.0.0.1:8081:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
@@ -77,13 +77,13 @@
       - secure_net</div>
 
     <div class="note" style="border-left-color: #2196f3;">
-        <strong>JustificaciÃ³n de Seguridad:</strong> Al atar Nginx estrictamente a <code>127.0.0.1</code>, bloqueamos por diseÃ±o que un atacante intente saltarse Apache escaneando o atacando la IP pÃºblica del servidor por el puerto 8081. Nginx serÃ¡ completamente sordo a peticiones externas no enrutadas.
+        <strong>Justificación de Seguridad:</strong> Al atar Nginx estrictamente a <code>127.0.0.1</code>, bloqueamos por diseño que un atacante intente saltarse Apache escaneando o atacando la IP pública del servidor por el puerto 8081. Nginx será completamente sordo a peticiones externas no enrutadas.
     </div>
 
     <h2>3. Defensas Activas: Cortafuegos Restrictivo en Nginx</h2>
-    <p>Asumiendo que todo trÃ¡fico entrante es potencialmente hostil, se configuran reglas en Nginx con umbrales extremadamente bajos, ajustados milimÃ©tricamente al uso real de la API.</p>
+    <p>Asumiendo que todo tráfico entrante es potencialmente hostil, se configuran reglas en Nginx con umbrales extremadamente bajos, ajustados milimétricamente al uso real de la API.</p>
 
-    <div class="file-header">ðŸ“„ nginx.conf (Bloque http)</div>
+    <div class="file-header">📄 nginx.conf (Bloque http)</div>
     <div class="file-content">http {
     # 1. Ocultar huella del servidor a los atacantes (Evita perfilado de CVEs)
     server_tokens off;
@@ -97,15 +97,15 @@
     # ...
 }</div>
 
-    <h3>3.1. Reglas de ProtecciÃ³n (Bloque server)</h3>
-    <p>Dentro del servidor Nginx, aplicamos barreras diseÃ±adas para estrangular cargas maliciosas antes de que consuman ciclos de CPU o memoria en el Backend.</br>
-      Json manda unos 3kb, con 56k se tiene un margen de seguridad amplio para cualquier peticiÃ³n legÃ­tima, pero se bloquea cualquier intento de subida de archivos o inyecciÃ³n de payloads gigantes.</p>
+    <h3>3.1. Reglas de Protección (Bloque server)</h3>
+    <p>Dentro del servidor Nginx, aplicamos barreras diseñadas para estrangular cargas maliciosas antes de que consuman ciclos de CPU o memoria en el Backend.</br>
+      Json manda unos 3kb, con 56k se tiene un margen de seguridad amplio para cualquier petición legítima, pero se bloquea cualquier intento de subida de archivos o inyección de payloads gigantes.</p>
 
-    <div class="file-header">ðŸ“„ nginx.conf (Bloque server)</div>
+    <div class="file-header">📄 nginx.conf (Bloque server)</div>
     <div class="file-content">    server {
         listen 80;
 
-        # BARRERA 1: Bloqueo de Payloads Pesados (RestricciÃ³n a 56 Kilobytes, o menos). 
+        # BARRERA 1: Bloqueo de Payloads Pesados (Restricción a 56 Kilobytes, o menos). 
         client_max_body_size 56k;
 
         # BARRERA 2: Timeouts Anti-Zombies (Corte agresivo a 10s)
@@ -114,7 +114,7 @@
         send_timeout 10s;
 
         location / {
-            # BARRERA 3: EjecuciÃ³n implacable del Rate Limiting
+            # BARRERA 3: Ejecución implacable del Rate Limiting
             limit_req zone=api_limit burst=10 nodelay;
 
             proxy_pass http://backend_servers;
@@ -122,21 +122,21 @@
     }</div>
 
     <ul style="margin-bottom: 2rem;">
-        <li><strong>LÃ­mite Asfixiante de 56k:</strong> Calculado basÃ¡ndose en el peso real mÃ¡ximo de un JSON legÃ­timo de la aplicaciÃ³n. Bloquea instantÃ¡neamente (Error 413) intentos de desbordamiento de bÃºfer o subida de binarios.</li>
-        <li><strong>Timeouts Agresivos (10s):</strong> Mitiga ataques tipo "Slowloris", cortando conexiones de clientes que envÃ­an datos a cuentagotas para agotar los hilos disponibles.</li>
-        <li><strong>Burst=10 nodelay:</strong> Permite una ventana de 10 peticiones rÃ¡pidas para carga inicial, pero a partir de ahÃ­ bloquea sin piedad cualquier rÃ¡faga de fuerza bruta devolviendo Error 503.</li>
+        <li><strong>Límite Asfixiante de 56k:</strong> Calculado basándose en el peso real máximo de un JSON legítimo de la aplicación. Bloquea instantáneamente (Error 413) intentos de desbordamiento de búfer o subida de binarios.</li>
+        <li><strong>Timeouts Agresivos (10s):</strong> Mitiga ataques tipo "Slowloris", cortando conexiones de clientes que envían datos a cuentagotas para agotar los hilos disponibles.</li>
+        <li><strong>Burst=10 nodelay:</strong> Permite una ventana de 10 peticiones rápidas para carga inicial, pero a partir de ahí bloquea sin piedad cualquier ráfaga de fuerza bruta devolviendo Error 503.</li>
     </ul>
 
-    <h2>4. AuditorÃ­a y Trazabilidad (Logs)</h2>
-    <p>Dado que la API opera detrÃ¡s de mÃºltiples proxies (Apache -> Nginx -> Docker), las IP entrantes se enmascaran como locales. Se implementa una trazabilidad absoluta para extraer el origen real del trÃ¡fico.</p>
+    <h2>4. Auditoría y Trazabilidad (Logs)</h2>
+    <p>Dado que la API opera detrás de múltiples proxies (Apache -> Nginx -> Docker), las IP entrantes se enmascaran como locales. Se implementa una trazabilidad absoluta para extraer el origen real del tráfico.</p>
 
-    <div class="file-header">ðŸ“„ nginx.conf (Cabeceras y Logs)</div>
+    <div class="file-header">📄 nginx.conf (Cabeceras y Logs)</div>
     <div class="file-content">    # 1. Formato personalizado para capturar la IP real y el Vector de Ataque
     log_format main '$remote_addr - $remote_user [$time_local] "$request" '
                     '$status $body_bytes_sent "$http_referer" '
                     '"$http_user_agent" "$http_x_forwarded_for"';
 
-    # 2. Aplicar la polÃ­tica de logs
+    # 2. Aplicar la política de logs
     access_log /var/log/nginx/access.log main;
 
     location / {
@@ -146,22 +146,22 @@
         proxy_pass http://backend_servers;
     }</div>
 
-    <h3>4.1. Comandos de InspecciÃ³n (Respuesta a Incidentes)</h3>
-    <p>Comandos operativos para auditar el sistema o reaccionar ante anomalÃ­as de trÃ¡fico.</p>
+    <h3>4.1. Comandos de Inspección (Respuesta a Incidentes)</h3>
+    <p>Comandos operativos para auditar el sistema o reaccionar ante anomalías de tráfico.</p>
 
     <div class="terminal">
-        <span class="comment"># Monitorizar el trÃ¡fico en tiempo real atravesando las defensas</span>
+        <span class="comment"># Monitorizar el tráfico en tiempo real atravesando las defensas</span>
         <div class="cmd">docker logs -f app_nginx</div>
 
         <span class="comment"># Cazar IPs bloqueadas por el limitador de velocidad (Rate Limiting)</span>
         <div class="cmd">docker logs app_nginx | grep "limiting requests"</div>
 
-        <span class="comment"># Identificar intentos de inyecciÃ³n de payloads gigantes (>56KB)</span>
+        <span class="comment"># Identificar intentos de inyección de payloads gigantes (>56KB)</span>
         <div class="cmd">docker logs app_nginx | grep "client intended to send too large body"</div>
     </div>
 
     <div class="footer">
-        DocumentaciÃ³n de Arquitectura de Seguridad y Redes.
+        Documentación de Arquitectura de Seguridad y Redes.
     </div>
 
 </div>

@@ -11,7 +11,7 @@
 
 <div class="document-page">
 
-    <h1>Proyecto: MigraciÃ³n de ERP a Microservicios</h1>
+    <h1>Proyecto: Migración de ERP a Microservicios</h1>
     <p>
         <span class="badge">Docker Compose</span>
         <span class="badge">Apache Reverse Proxy</span>
@@ -20,11 +20,11 @@
     </p>
 
     <div class="note">
-        <strong>Resumen TÃ©cnico:</strong> DocumentaciÃ³n de la implementaciÃ³n de Odoo ERP mediante arquitectura de contenedores, incluyendo persistencia de datos y seguridad SSL automatizada.
+        <strong>Resumen Técnico:</strong> Documentación de la implementación de Odoo ERP mediante arquitectura de contenedores, incluyendo persistencia de datos y seguridad SSL automatizada.
     </div>
 
-    <h2>1. Arquitectura LÃ³gica</h2>
-    <p>El sistema desacopla la base de datos de la aplicaciÃ³n mediante una red interna de Docker, exponiendo solo el puerto seguro a internet a travÃ©s de Apache.</p>
+    <h2>1. Arquitectura Lógica</h2>
+    <p>El sistema desacopla la base de datos de la aplicación mediante una red interna de Docker, exponiendo solo el puerto seguro a internet a través de Apache.</p>
     
     <div class="mermaid">
     graph LR
@@ -38,10 +38,10 @@
         style DB fill:#b3e5fc,stroke:#0277bd,stroke-width:2px
     </div>
 
-    <h2>2. Infraestructura como CÃ³digo (Docker Compose)</h2>
-    <p>DefiniciÃ³n del stack de servicios. Se utilizan volÃºmenes nombrados para garantizar que los datos no se pierdan al reiniciar los contenedores.</p>
+    <h2>2. Infraestructura como Código (Docker Compose)</h2>
+    <p>Definición del stack de servicios. Se utilizan volúmenes nombrados para garantizar que los datos no se pierdan al reiniciar los contenedores.</p>
     
-    <div class="file-header">ðŸ“„ docker-compose.yml</div>
+    <div class="file-header">📄 docker-compose.yml</div>
     <div class="file-content">version: '3.1'
 
 services:
@@ -57,7 +57,7 @@ services:
     environment:
       - HOST=db
       - USER=odoo 
-      - PASSWORD=tu_contrasena_segura  # Cambiar en producciÃ³n
+      - PASSWORD=tu_contrasena_segura  # Cambiar en producción
     restart: always
 
   db:
@@ -82,8 +82,8 @@ volumes:
         <div class="cmd">mkdir -p ~/docker-apps/odoo</div>
         <div class="cmd">cd ~/docker-apps/odoo</div>
 
-        <span class="comment"># 2. Crear y editar el fichero de configuraciÃ³n (pegar contenido de arriba)</span>
-        <span class="comment"># Nota: TambiÃ©n puedes crearlo desde VS Code y usar la terminal integrada</span>
+        <span class="comment"># 2. Crear y editar el fichero de configuración (pegar contenido de arriba)</span>
+        <span class="comment"># Nota: También puedes crearlo desde VS Code y usar la terminal integrada</span>
         <div class="cmd">nano docker-compose.yml</div>
         
         <span class="comment"># 3. Arrancar los contenedores en segundo plano (Detached)</span>
@@ -94,10 +94,10 @@ volumes:
         <div class="cmd">docker compose logs -f</div>
     </div>
 
-    <h2>4. ConfiguraciÃ³n del Proxy Inverso</h2>
-    <p>Apache gestiona la redirecciÃ³n del subdominio hacia el puerto local de Docker.</p>
+    <h2>4. Configuración del Proxy Inverso</h2>
+    <p>Apache gestiona la redirección del subdominio hacia el puerto local de Docker.</p>
 
-    <div class="file-header">ðŸ“„ /etc/apache2/sites-available/odoo-docker.conf</div>
+    <div class="file-header">📄 /etc/apache2/sites-available/odoo-docker.conf</div>
     <div class="file-content">&lt;VirtualHost *:80&gt;
     ServerName miproyecto-erp.duckdns.org
 
@@ -114,11 +114,11 @@ volumes:
     RequestHeader set "X-Forwarded-Proto" "https"
 &lt;/VirtualHost&gt;</div>
 
-    <h2>5. AutomatizaciÃ³n SSL (Certbot)</h2>
-    <p>Comando final para asegurar la conexiÃ³n y generar certificados.</p>
+    <h2>5. Automatización SSL (Certbot)</h2>
+    <p>Comando final para asegurar la conexión y generar certificados.</p>
     
     <div class="terminal">
-        <span class="comment"># Generar certificado y configurar redirecciÃ³n HTTPS automÃ¡tica</span>
+        <span class="comment"># Generar certificado y configurar redirección HTTPS automática</span>
         <span class="comment"># Importante: El dominio (-d) debe coincidir con tu ServerName</span>
         <div class="cmd">sudo certbot --apache -d miproyecto-erp.duckdns.org</div>
         
@@ -126,21 +126,21 @@ volumes:
         <div class="cmd">sudo systemctl reload apache2</div>
     </div>
 
-    <h2>6. VerificaciÃ³n Final</h2>
+    <h2>6. Verificación Final</h2>
     <ul>
-        <li>âœ… <strong>Persistencia:</strong> Datos de BD seguros en volÃºmenes Docker.</li>
-        <li>âœ… <strong>Alta Disponibilidad:</strong> <code>restart: always</code> configurado.</li>
-        <li>âœ… <strong>Seguridad:</strong> HTTPS forzado y aislamiento de red.</li>
+        <li>✅ <strong>Persistencia:</strong> Datos de BD seguros en volúmenes Docker.</li>
+        <li>✅ <strong>Alta Disponibilidad:</strong> <code>restart: always</code> configurado.</li>
+        <li>✅ <strong>Seguridad:</strong> HTTPS forzado y aislamiento de red.</li>
     </ul>
 
     <div class="footer">
-        DocumentaciÃ³n TÃ©cnica - Generada para Portfolio Personal
+        Documentación Técnica - Generada para Portfolio Personal
     </div>
 
 </div>
 
 <script>
-    // Inicializar Mermaid con tema claro/neutro para encajar con la guÃ­a
+    // Inicializar Mermaid con tema claro/neutro para encajar con la guía
     mermaid.initialize({
         startOnLoad: true,
         theme: 'neutral',

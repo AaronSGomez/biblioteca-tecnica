@@ -79,7 +79,7 @@
          2. "Arquitectura Backend": Interactive diagram of Spring Boot layers + Docker logic.
          3. "Flujo de Datos": The core "Router" logic (Verifactu vs TicketBAI) visualized.
          4. "Resiliencia & Persistencia": Simulation of retry logic and DB reliability.
-         5. "GuÃ­a de Despliegue": Checklist for Raspberry Pi/Cloud migration.
+         5. "Guía de Despliegue": Checklist for Raspberry Pi/Cloud migration.
          Why: The user needs a "Development Guide". A linear document is passive. This structure allows the user to simulate the architecture (click to see data flow), understand the retry mechanisms visually, and use the deployment section as a checklist. It moves from Logic -> Implementation -> Operations.
     -->
 
@@ -108,27 +108,27 @@
             <ul class="space-y-1">
                 <li>
                     <button onclick="navTo('dashboard')" id="nav-dashboard" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 active-nav transition-colors">
-                        ðŸ“Š Estado del Proyecto
+                        📊 Estado del Proyecto
                     </button>
                 </li>
                 <li>
                     <button onclick="navTo('backend')" id="nav-backend" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        âš™ï¸ Arquitectura Spring Boot
+                        ⚙️ Arquitectura Spring Boot
                     </button>
                 </li>
                 <li>
                     <button onclick="navTo('flow')" id="nav-flow" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        ðŸ”€ Enrutador Fiscal
+                        🔀 Enrutador Fiscal
                     </button>
                 </li>
                 <li>
                     <button onclick="navTo('reliability')" id="nav-reliability" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        ðŸ›¡ï¸ Resiliencia y Retries
+                        🛡️ Resiliencia y Retries
                     </button>
                 </li>
                 <li>
                     <button onclick="navTo('deployment')" id="nav-deployment" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        ðŸš€ Docker & Despliegue
+                        🚀 Docker & Despliegue
                     </button>
                 </li>
             </ul>
@@ -164,7 +164,7 @@
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Resumen Ejecutivo y Estado Actual</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    Este panel ofrece una visiÃ³n global de la integraciÃ³n de VeriFactu y TicketBAI. Actualmente, el nÃºcleo criptogrÃ¡fico (Hashing encadenado y Firma XAdES) estÃ¡ completado en Java. El siguiente gran hito es la implementaciÃ³n del **Backend Spring Boot**, la capa de **Transporte Seguro** y la **Infraestructura Docker**.
+                    Este panel ofrece una visión global de la integración de VeriFactu y TicketBAI. Actualmente, el núcleo criptográfico (Hashing encadenado y Firma XAdES) está completado en Java. El siguiente gran hito es la implementación del **Backend Spring Boot**, la capa de **Transporte Seguro** y la **Infraestructura Docker**.
                 </p>
             </div>
 
@@ -172,7 +172,7 @@
                 <!-- KPI Cards -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 uppercase">MÃ³dulo Cripto</p>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Módulo Cripto</p>
                         <h3 class="text-3xl font-bold text-gray-900 mt-2">100%</h3>
                         <p class="text-sm text-green-600 mt-1">Implementado</p>
                     </div>
@@ -182,7 +182,7 @@
                     <div>
                         <p class="text-sm font-medium text-gray-500 uppercase">Transporte</p>
                         <h3 class="text-3xl font-bold text-gray-900 mt-2">15%</h3>
-                        <p class="text-sm text-orange-500 mt-1">En DiseÃ±o</p>
+                        <p class="text-sm text-orange-500 mt-1">En Diseño</p>
                     </div>
                     <div class="mt-4 text-xs text-gray-400">SOAP/REST Pendiente</div>
                 </div>
@@ -190,7 +190,7 @@
                     <div>
                         <p class="text-sm font-medium text-gray-500 uppercase">Infraestructura</p>
                         <h3 class="text-3xl font-bold text-gray-900 mt-2">Docker</h3>
-                        <p class="text-sm text-blue-600 mt-1">PlanificaciÃ³n</p>
+                        <p class="text-sm text-blue-600 mt-1">Planificación</p>
                     </div>
                     <div class="mt-4 text-xs text-gray-400">Raspberry Pi / Cloud</div>
                 </div>
@@ -204,12 +204,12 @@
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">PrÃ³ximos Pasos CrÃ­ticos</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Próximos Pasos Críticos</h3>
                     <div class="space-y-4">
                         <div class="flex items-start gap-3">
-                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold">âœ“</div>
+                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold">✓</div>
                             <div>
-                                <h4 class="text-sm font-medium text-gray-900">Validar CriptografÃ­a</h4>
+                                <h4 class="text-sm font-medium text-gray-900">Validar Criptografía</h4>
                                 <p class="text-xs text-gray-500">Hash SHA-256 encadenado y Firma RSA probados.</p>
                             </div>
                         </div>
@@ -217,7 +217,7 @@
                             <div class="flex-shrink-0 w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">2</div>
                             <div>
                                 <h4 class="text-sm font-medium text-gray-900">Levantar Spring Boot</h4>
-                                <p class="text-xs text-gray-500">Crear controladores y servicios de facturaciÃ³n.</p>
+                                <p class="text-xs text-gray-500">Crear controladores y servicios de facturación.</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -244,7 +244,7 @@
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Arquitectura Spring Boot</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    La aplicaciÃ³n Java debe estructurarse en capas claras para separar la lÃ³gica de negocio (generaciÃ³n de facturas), la lÃ³gica de seguridad (firmas) y la lÃ³gica de transporte (envÃ­o a Hacienda). A continuaciÃ³n, interactÃºa con el diagrama para ver las responsabilidades de cada capa.
+                    La aplicación Java debe estructurarse en capas claras para separar la lógica de negocio (generación de facturas), la lógica de seguridad (firmas) y la lógica de transporte (envío a Hacienda). A continuación, interactúa con el diagrama para ver las responsabilidades de cada capa.
                 </p>
             </div>
 
@@ -298,7 +298,7 @@
                     <div class="absolute top-0 right-0 p-4 opacity-20 text-6xl font-bold">JAVA</div>
                     
                     <div id="arch-content-placeholder" class="h-full flex items-center justify-center text-gray-500">
-                        <p>Selecciona una capa a la izquierda para ver detalles de implementaciÃ³n.</p>
+                        <p>Selecciona una capa a la izquierda para ver detalles de implementación.</p>
                     </div>
 
                     <div id="arch-content-controller" class="hidden animate-fade-in">
@@ -307,11 +307,11 @@
 @PostMapping("/api/v1/invoices")
 public ResponseEntity&lt;InvoiceResult&gt; create(@RequestBody InvoiceDTO invoice) {
     // 1. Recibe datos crudos desde la App
-    // 2. Valida formato bÃ¡sico
-    // 3. Llama al servicio asÃ­ncrono
+    // 2. Valida formato básico
+    // 3. Llama al servicio asíncrono
     return ResponseEntity.ok(invoiceService.process(invoice));
 }</pre>
-                        <p class="text-gray-400">El controlador debe ser ligero. Su Ãºnica funciÃ³n es recibir la peticiÃ³n HTTP y delegar. No realiza cÃ¡lculos.</p>
+                        <p class="text-gray-400">El controlador debe ser ligero. Su única función es recibir la petición HTTP y delegar. No realiza cálculos.</p>
                     </div>
 
                     <div id="arch-content-service" class="hidden animate-fade-in">
@@ -331,10 +331,10 @@ public InvoiceResult process(InvoiceDTO data) {
     // 4. Guardar estado "PENDIENTE_ENVIO"
     repo.save(new InvoiceEntity(data, newHash, signature));
     
-    // 5. Disparar envÃ­o asÃ­ncrono
+    // 5. Disparar envío asíncrono
     eventPublisher.publish(new SendInvoiceEvent(id));
 }</pre>
-                        <p class="text-gray-400">El corazÃ³n del sistema. Garantiza que la factura se guarde y se encadene antes de intentar enviarla.</p>
+                        <p class="text-gray-400">El corazón del sistema. Garantiza que la factura se guarde y se encadene antes de intentar enviarla.</p>
                     </div>
 
                     <div id="arch-content-crypto" class="hidden animate-fade-in">
@@ -346,13 +346,13 @@ public InvoiceResult process(InvoiceDTO data) {
                             <li><code>KeyManager.java</code>: Carga el <code>.p12</code> desde volumen seguro.</li>
                         </ul>
                         <div class="bg-yellow-900/30 border border-yellow-700 p-3 rounded text-yellow-500 text-xs">
-                            âš  IMPORTANTE: El certificado .p12 no debe estar en el cÃ³digo fuente. Debe montarse como volumen Docker en <code>/secure/cert.p12</code>.
+                            ⚠ IMPORTANTE: El certificado .p12 no debe estar en el código fuente. Debe montarse como volumen Docker en <code>/secure/cert.p12</code>.
                         </div>
                     </div>
 
                     <div id="arch-content-transport" class="hidden animate-fade-in">
                         <h3 class="text-green-400 font-bold text-lg mb-2">Transport Strategy</h3>
-                        <p class="text-gray-300 mb-2">PatrÃ³n "Strategy" para elegir protocolo:</p>
+                        <p class="text-gray-300 mb-2">Patrón "Strategy" para elegir protocolo:</p>
                         <pre class="bg-gray-800 p-4 rounded mb-4 overflow-x-auto">
 public interface FiscalSender {
     void send(Invoice inv);
@@ -363,7 +363,7 @@ public class VerifactuSoapSender implements FiscalSender { ... }
 
 // Para Bizkaia (Batuz)
 public class TicketBaiRestSender implements FiscalSender { ... }</pre>
-                        <p class="text-gray-400">Esto permite aÃ±adir nuevas haciendas (Navarra, Ãlava) sin tocar el cÃ³digo principal.</p>
+                        <p class="text-gray-400">Esto permite añadir nuevas haciendas (Navarra, Álava) sin tocar el código principal.</p>
                     </div>
                     
                     <div id="arch-content-repo" class="hidden animate-fade-in">
@@ -376,7 +376,7 @@ TABLE invoices (
     prev_hash VARCHAR(64) NOT NULL,
     signature TEXT,
     status VARCHAR(20) DEFAULT 'PENDING', -- PENDING, SENT, ERROR
-    aeat_csv VARCHAR(100), -- CÃ³digo Seguro VerificaciÃ³n devuelto
+    aeat_csv VARCHAR(100), -- Código Seguro Verificación devuelto
     retry_count INT DEFAULT 0
 );</pre>
                     </div>
@@ -389,13 +389,13 @@ TABLE invoices (
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">El "Router" Fiscal</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    Dependiendo de la sede fiscal del emisor, la aplicaciÃ³n debe comportarse como una agencia de viajes inteligente, empaquetando los datos en diferentes formatos (XML SOAP vs JSON/XML REST). Selecciona una regiÃ³n para ver el flujo.
+                    Dependiendo de la sede fiscal del emisor, la aplicación debe comportarse como una agencia de viajes inteligente, empaquetando los datos en diferentes formatos (XML SOAP vs JSON/XML REST). Selecciona una región para ver el flujo.
                 </p>
                 
                 <div class="mt-6 flex flex-wrap gap-4">
-                    <button onclick="updateFlow('aeat')" class="px-4 py-2 rounded-full border border-gray-300 hover:border-orange-500 hover:bg-orange-50 focus:ring-2 focus:ring-orange-500 transition-all font-medium text-sm">ðŸ›ï¸ Territorio Nacional (AEAT)</button>
-                    <button onclick="updateFlow('bizkaia')" class="px-4 py-2 rounded-full border border-gray-300 hover:border-green-500 hover:bg-green-50 focus:ring-2 focus:ring-green-500 transition-all font-medium text-sm">ðŸŒ³ Bizkaia (Batuz/LROE)</button>
-                    <button onclick="updateFlow('gipuzkoa')" class="px-4 py-2 rounded-full border border-gray-300 hover:border-blue-500 hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 transition-all font-medium text-sm">ðŸŒŠ Gipuzkoa (TicketBAI)</button>
+                    <button onclick="updateFlow('aeat')" class="px-4 py-2 rounded-full border border-gray-300 hover:border-orange-500 hover:bg-orange-50 focus:ring-2 focus:ring-orange-500 transition-all font-medium text-sm">🏛️ Territorio Nacional (AEAT)</button>
+                    <button onclick="updateFlow('bizkaia')" class="px-4 py-2 rounded-full border border-gray-300 hover:border-green-500 hover:bg-green-50 focus:ring-2 focus:ring-green-500 transition-all font-medium text-sm">🌳 Bizkaia (Batuz/LROE)</button>
+                    <button onclick="updateFlow('gipuzkoa')" class="px-4 py-2 rounded-full border border-gray-300 hover:border-blue-500 hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 transition-all font-medium text-sm">🌊 Gipuzkoa (TicketBAI)</button>
                 </div>
             </div>
 
@@ -405,27 +405,27 @@ TABLE invoices (
                     
                     <!-- Step 1: Input -->
                     <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                        <div class="text-2xl mb-2">ðŸ§¾</div>
+                        <div class="text-2xl mb-2">🧾</div>
                         <div class="font-bold text-gray-700">Factura</div>
                         <div class="text-xs text-gray-500">JSON desde App</div>
                     </div>
 
                     <!-- Arrow -->
-                    <div class="hidden md:block text-gray-300 text-xl">âž”</div>
+                    <div class="hidden md:block text-gray-300 text-xl">➔</div>
 
                     <!-- Step 2: Processing (Variable) -->
                     <div id="flow-process" class="p-4 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-500">
-                        <div class="text-2xl mb-2">âš™ï¸</div>
+                        <div class="text-2xl mb-2">⚙️</div>
                         <div class="font-bold text-gray-700">Procesador</div>
-                        <div class="text-xs text-gray-500">Selecciona RegiÃ³n</div>
+                        <div class="text-xs text-gray-500">Selecciona Región</div>
                     </div>
 
                     <!-- Arrow -->
-                    <div class="hidden md:block text-gray-300 text-xl">âž”</div>
+                    <div class="hidden md:block text-gray-300 text-xl">➔</div>
 
                     <!-- Step 3: Destination (Variable) -->
                     <div id="flow-dest" class="p-4 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-500">
-                        <div class="text-2xl mb-2">ðŸ¢</div>
+                        <div class="text-2xl mb-2">🏢</div>
                         <div class="font-bold text-gray-700">Hacienda</div>
                         <div class="text-xs text-gray-500">Esperando...</div>
                     </div>
@@ -434,7 +434,7 @@ TABLE invoices (
                 <!-- Contextual Detail Box -->
                 <div id="flow-details" class="mt-8 p-4 bg-blue-50 text-blue-800 rounded-lg border border-blue-100 hidden">
                     <h4 class="font-bold mb-1" id="flow-title">Detalle</h4>
-                    <p class="text-sm" id="flow-desc">DescripciÃ³n...</p>
+                    <p class="text-sm" id="flow-desc">Descripción...</p>
                     <div class="mt-3 flex gap-2">
                         <span class="text-xs bg-white border border-blue-200 px-2 py-1 rounded font-mono" id="flow-tech1">SOAP</span>
                         <span class="text-xs bg-white border border-blue-200 px-2 py-1 rounded font-mono" id="flow-tech2">XML</span>
@@ -448,11 +448,11 @@ TABLE invoices (
              <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Sistema de Reintentos y Cola</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    Hacienda impone sanciones si las facturas no se envÃ­an secuencialmente o si se pierden. Si la conexiÃ³n falla, <strong>NO</strong> se debe perder la factura. Implementaremos un sistema de "Exponential Backoff" (espera incremental) y una cola persistente.
+                    Hacienda impone sanciones si las facturas no se envían secuencialmente o si se pierden. Si la conexión falla, <strong>NO</strong> se debe perder la factura. Implementaremos un sistema de "Exponential Backoff" (espera incremental) y una cola persistente.
                 </p>
                 <div class="mt-4 flex gap-4">
                     <button onclick="simulateRetry()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
-                        âš ï¸ Simular Fallo de Red
+                        ⚠️ Simular Fallo de Red
                     </button>
                     <button onclick="resetRetry()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                         Reiniciar
@@ -476,11 +476,11 @@ TABLE invoices (
                     <ul class="space-y-4">
                         <li class="flex items-start gap-3">
                             <span class="flex-shrink-0 w-6 h-6 rounded bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold">1</span>
-                            <span class="text-sm text-gray-600"><strong>Persistencia Primero:</strong> Nunca intentar enviar si la factura no estÃ¡ guardada en BD con estado <code>PENDING</code>.</span>
+                            <span class="text-sm text-gray-600"><strong>Persistencia Primero:</strong> Nunca intentar enviar si la factura no está guardada en BD con estado <code>PENDING</code>.</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <span class="flex-shrink-0 w-6 h-6 rounded bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">2</span>
-                            <span class="text-sm text-gray-600"><strong>Hilo AsÃ­ncrono:</strong> El usuario recibe "OK" en la App en cuanto se guarda en BD. El envÃ­o es transparente en background.</span>
+                            <span class="text-sm text-gray-600"><strong>Hilo Asíncrono:</strong> El usuario recibe "OK" en la App en cuanto se guarda en BD. El envío es transparente en background.</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <span class="flex-shrink-0 w-6 h-6 rounded bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">3</span>
@@ -500,7 +500,7 @@ TABLE invoices (
              <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Infraestructura Docker & Despliegue</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    Para garantizar la portabilidad (Raspberry Pi -> Cloud), usaremos Docker Compose. La seguridad SSL es crÃ­tica para que la App Flutter se comunique con el Backend.
+                    Para garantizar la portabilidad (Raspberry Pi -> Cloud), usaremos Docker Compose. La seguridad SSL es crítica para que la App Flutter se comunique con el Backend.
                 </p>
             </div>
 
@@ -536,17 +536,17 @@ TABLE invoices (
 
                 <!-- Checklist -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Checklist MigraciÃ³n / Setup</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Checklist Migración / Setup</h3>
                     
                     <div class="space-y-4">
                         <div class="border-l-4 border-orange-500 pl-4 py-1">
                             <h4 class="font-bold text-sm text-gray-800">1. Dominio & DDNS (Raspberry Pi)</h4>
-                            <p class="text-xs text-gray-600 mt-1">Configurar <code>ddclient</code> o script en el router para actualizar la IP dinÃ¡mica. El dominio debe apuntar a la IP pÃºblica.</p>
+                            <p class="text-xs text-gray-600 mt-1">Configurar <code>ddclient</code> o script en el router para actualizar la IP dinámica. El dominio debe apuntar a la IP pública.</p>
                         </div>
 
                         <div class="border-l-4 border-orange-500 pl-4 py-1">
                             <h4 class="font-bold text-sm text-gray-800">2. Certificados SSL (LetsEncrypt)</h4>
-                            <p class="text-xs text-gray-600 mt-1">Usar <code>Certbot</code> en Docker para generar certificados vÃ¡lidos. Flutter rechazarÃ¡ certificados autofirmados en producciÃ³n.</p>
+                            <p class="text-xs text-gray-600 mt-1">Usar <code>Certbot</code> en Docker para generar certificados válidos. Flutter rechazará certificados autofirmados en producción.</p>
                         </div>
 
                         <div class="border-l-4 border-orange-500 pl-4 py-1">
@@ -555,7 +555,7 @@ TABLE invoices (
                         </div>
 
                         <div class="border-l-4 border-gray-300 pl-4 py-1">
-                            <h4 class="font-bold text-sm text-gray-800">4. MigraciÃ³n a Cloud (AWS/Azure)</h4>
+                            <h4 class="font-bold text-sm text-gray-800">4. Migración a Cloud (AWS/Azure)</h4>
                             <p class="text-xs text-gray-600 mt-1">Simplemente copiar el <code>docker-compose.yml</code> y la carpeta <code>pgdata</code>. Cambiar DNS y regenerar SSL. Tiempo estimado: 15 min.</p>
                         </div>
                     </div>
@@ -611,7 +611,7 @@ TABLE invoices (
             state.statusChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['CriptografÃ­a (Java)', 'Backend (Spring)', 'Transporte (HTTP)', 'Infraestructura'],
+                    labels: ['Criptografía (Java)', 'Backend (Spring)', 'Transporte (HTTP)', 'Infraestructura'],
                     datasets: [{
                         data: [100, 20, 15, 10],
                         backgroundColor: ['#16a34a', '#ea580c', '#2563eb', '#9ca3af'],
@@ -674,7 +674,7 @@ TABLE invoices (
                 state.retryChartInstance.data.datasets[0].data.push(nextValue);
                 state.retryChartInstance.update();
             } else {
-                alert("LÃ­mite de reintentos alcanzado. Alerta enviada al admin.");
+                alert("Límite de reintentos alcanzado. Alerta enviada al admin.");
             }
         }
 
@@ -711,34 +711,34 @@ TABLE invoices (
 
             if (region === 'aeat') {
                 processBox.className = "p-4 rounded-lg bg-blue-100 border border-blue-300 shadow-md transform scale-105 transition-all";
-                processBox.innerHTML = '<div class="text-2xl mb-2">ðŸ“œ</div><div class="font-bold text-blue-900">SOAP Envelope</div><div class="text-xs text-blue-700">Client Sign</div>';
+                processBox.innerHTML = '<div class="text-2xl mb-2">📜</div><div class="font-bold text-blue-900">SOAP Envelope</div><div class="text-xs text-blue-700">Client Sign</div>';
                 
-                destBox.innerHTML = '<div class="text-2xl mb-2">ðŸ‡ªðŸ‡¸</div><div class="font-bold text-gray-800">AEAT</div><div class="text-xs text-gray-500">Veri*Factu</div>';
+                destBox.innerHTML = '<div class="text-2xl mb-2">🇪🇸</div><div class="font-bold text-gray-800">AEAT</div><div class="text-xs text-gray-500">Veri*Factu</div>';
                 
                 title.innerText = "Veri*Factu (Nacional)";
-                desc.innerText = "Usa protocolo SOAP. El XML de Alta se incrusta en el Body del SOAP. Requiere certificado digital en la conexiÃ³n (mTLS opcional pero recomendado).";
+                desc.innerText = "Usa protocolo SOAP. El XML de Alta se incrusta en el Body del SOAP. Requiere certificado digital en la conexión (mTLS opcional pero recomendado).";
                 t1.innerText = "SOAP 1.1";
                 t2.innerText = "XML DSig";
 
             } else if (region === 'bizkaia') {
                 processBox.className = "p-4 rounded-lg bg-green-100 border border-green-300 shadow-md transform scale-105 transition-all";
-                processBox.innerHTML = '<div class="text-2xl mb-2">ðŸ“¦</div><div class="font-bold text-green-900">LROE Wrap</div><div class="text-xs text-green-700">TicketBAI + Batuz</div>';
+                processBox.innerHTML = '<div class="text-2xl mb-2">📦</div><div class="font-bold text-green-900">LROE Wrap</div><div class="text-xs text-green-700">TicketBAI + Batuz</div>';
 
-                destBox.innerHTML = '<div class="text-2xl mb-2">ðŸŒ³</div><div class="font-bold text-gray-800">Bizkaia</div><div class="text-xs text-gray-500">Batuz API</div>';
+                destBox.innerHTML = '<div class="text-2xl mb-2">🌳</div><div class="font-bold text-gray-800">Bizkaia</div><div class="text-xs text-gray-500">Batuz API</div>';
 
                 title.innerText = "Batuz (Bizkaia)";
-                desc.innerText = "Modelo REST. El fichero TicketBAI se comprime en GZIP y se incrusta en base64 dentro de la estructura LROE (Libro Registro de Operaciones EconÃ³micas).";
+                desc.innerText = "Modelo REST. El fichero TicketBAI se comprime en GZIP y se incrusta en base64 dentro de la estructura LROE (Libro Registro de Operaciones Económicas).";
                 t1.innerText = "REST POST";
                 t2.innerText = "JSON/XML";
 
             } else if (region === 'gipuzkoa') {
                 processBox.className = "p-4 rounded-lg bg-indigo-100 border border-indigo-300 shadow-md transform scale-105 transition-all";
-                processBox.innerHTML = '<div class="text-2xl mb-2">ðŸš€</div><div class="font-bold text-indigo-900">Direct Send</div><div class="text-xs text-indigo-700">TicketBAI Raw</div>';
+                processBox.innerHTML = '<div class="text-2xl mb-2">🚀</div><div class="font-bold text-indigo-900">Direct Send</div><div class="text-xs text-indigo-700">TicketBAI Raw</div>';
 
-                destBox.innerHTML = '<div class="text-2xl mb-2">ðŸŒŠ</div><div class="font-bold text-gray-800">Gipuzkoa</div><div class="text-xs text-gray-500">Zergabidea</div>';
+                destBox.innerHTML = '<div class="text-2xl mb-2">🌊</div><div class="font-bold text-gray-800">Gipuzkoa</div><div class="text-xs text-gray-500">Zergabidea</div>';
 
                 title.innerText = "TicketBAI (Gipuzkoa)";
-                desc.innerText = "EnvÃ­o directo del XML TicketBAI firmado a travÃ©s de endpoint REST. Requiere cabeceras especÃ­ficas (Gipuzkoa-TicketBAI-Signature).";
+                desc.innerText = "Envío directo del XML TicketBAI firmado a través de endpoint REST. Requiere cabeceras específicas (Gipuzkoa-TicketBAI-Signature).";
                 t1.innerText = "REST";
                 t2.innerText = "XML XAdES";
             }
