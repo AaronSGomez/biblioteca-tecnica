@@ -83,6 +83,7 @@ header h1 {
   gap: 30px;
   width: 100%;
   box-sizing: border-box;
+  align-items: start;
 }
 
 /* Tarjetas de Aplicación */
@@ -102,7 +103,8 @@ header h1 {
 }
 
 .app-card:not(.portfolio-card) {
-  min-height: 270px;
+  height: 280px;
+  min-height: 280px;
   box-sizing: border-box;
 }
 
@@ -181,7 +183,8 @@ header h1 {
 
 @media (max-width: 600px) {
   .app-card:not(.portfolio-card) {
-    min-height: 240px;
+    height: 250px;
+    min-height: 250px;
   }
 
   .portfolio-card {
