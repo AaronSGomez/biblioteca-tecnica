@@ -1,520 +1,484 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifactu INFO</title>
+    <title>Guía Técnica VeriFactu | Novapay</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/paginas.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .chart-container { 
             position: relative; 
             width: 100%; 
-            max-width: 600px; 
-            margin-left: auto; 
-            margin-right: auto; 
-            height: 300px; 
+            max-width: 100%; 
+            height: 320px; 
             max-height: 400px; 
-        } 
-        @media (min-width: 768px) { 
-            .chart-container { height: 350px; } 
         }
         .bureaucratic-shadow {
             box-shadow: 4px 4px 0px 0px #cbd5e1;
         }
-        .active-tab {
-            background-color: #1e3a8a;
-            color: white;
-            border-bottom: 4px solid #f59e0b;
-        }
-        .inactive-tab {
-            background-color: white;
-            color: #4b5563;
-            border-bottom: 4px solid transparent;
-        }
-        .inactive-tab:hover {
-            background-color: #f1f5f9;
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
         }
     </style>
-    <!-- Chosen Palette: Bureaucratic Blue & Warning Amber - Representing the official, strict nature of tax administration mixed with the caution required for technical implementation. -->
-    <!-- Application Structure Plan:
-        1.  **Header & Metaphor:** Introduces the "Certified Letter" analogy using a visual representation of strictness.
-        2.  **The Challenge (Dashboard):** A dashboard view comparing the "Native Flutter" difficulty vs. "Backend Middleware". Uses charts to visualize complexity.
-        3.  **Library Navigator (The Solution):** An interactive section to explore the researched Dart libraries (XML, Crypto, HTTP) required for a native implementation, fulfilling the user's research request.
-        4.  **Service Map (Technical Specs):** A flowchart/list interaction detailing the specific Verifactu SOAP services (`RegFactu`, etc.).
-        5.  **Simulator:** A simple interactive "Envelope Validator" game to reinforce the concept of SOAP header strictness.
-    -->
-    <!-- Visualization & Content Choices:
-        - **Goal: Inform (Strictness):** Used a "Complexity Gauge" (Doughnut Chart) to visualize the high overhead of SOAP Headers vs Body.
-        - **Goal: Compare (Strategies):** Bar chart comparing "Development Time" vs "Maintenance" for Native vs Middleware approaches.
-        - **Goal: Organize (Libraries):** A toggle-card layout for Dart libraries (`xml`, `pointycastle`, etc.) to allow focused reading of technical details without clutter.
-        - **Goal: Process (Services):** A step-by-step interactive list for the SOAP operations (Alta, Anulación) to show the workflow.
-        - **NO SVG/Mermaid:** All icons are Unicode or CSS shapes. Charts are Chart.js.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
-<body class="text-slate-800">
+<body id="top" class="text-slate-800 bg-slate-100">
 
-    <!-- Navigation -->
-    <nav class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <span class="text-2xl">🏛️</span>
-                    <span class="font-bold text-xl tracking-tight">VeriFactu Technical Guide</span>
+<div class="document-page">
+
+    <!-- Top Action Bar (Back to index only) -->
+    <div class="manual-actions">
+        <a href="../index.html" class="manual-back">← Volver al índice</a>
+    </div>
+
+    <h1>Guía Técnica: Integración VeriFactu (SOAP, XML y Firma Digital)</h1>
+    <p>
+        <span class="badge">VeriFactu AEAT</span>
+        <span class="badge">SOAP / XML</span>
+        <span class="badge">Firma XAdES</span>
+        <span class="badge">Flutter & Spring Boot</span>
+    </p>
+
+    <!-- Introduction Section -->
+    <section class="bg-white rounded-lg p-6 bureaucratic-shadow border border-slate-200 my-6">
+        <h2 class="text-2xl font-bold text-slate-900 mb-3">El Reto del "Sobre Perfecto"</h2>
+        <p class="text-slate-700 leading-relaxed mb-4 text-sm">
+            La implementación del reglamento VeriFactu (normativa de la Agencia Tributaria al amparo de la Ley 11/2021 de medidas de prevención del fraude fiscal y el Real Decreto 1007/2023) exige que los sistemas informáticos de facturación garanticen la <strong>inalterabilidad, trazabilidad, legibilidad y conservación</strong> de todos los registros de ventas. El objetivo fundamental es erradicar el denominado "software de doble uso" o contabilidades paralelas.
+        </p>
+        <p class="text-slate-700 leading-relaxed mb-6 text-sm">
+            Técnicamente, enviar una factura a la AEAT no se limita a transmitir una estructura de datos JSON. Es un ejercicio de precisión burocrática comparable a enviar una carta certificada donde el envoltorio o sobre (el encabezado <code>SOAP Header</code> respaldado por la norma <strong>WS-Security</strong>) debe construirse con exactitud matemática. Si la canonización de la firma digital X.509 o la jerarquía de etiquetas difiere por un solo carácter de la especificación oficial, los servidores de la AEAT rechazarán la petición en la capa de transporte antes de llegar a leer el cuerpo del mensaje (<code>SOAP Body</code>).
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div class="bg-slate-50 p-4 rounded border border-slate-200">
+                <div class="text-3xl mb-2">📨</div>
+                <h3 class="font-semibold text-slate-700 mt-0 text-sm">Protocolo Estricto</h3>
+                <p class="text-xs text-slate-500 mt-1">SOAP 1.1 / 1.2 sobre HTTPS mTLS con validación de esquema WSDL estricto.</p>
+            </div>
+            <div class="bg-slate-50 p-4 rounded border border-slate-200">
+                <div class="text-3xl mb-2">🔐</div>
+                <h3 class="font-semibold text-slate-700 mt-0 text-sm">Seguridad Criptográfica</h3>
+                <p class="text-xs text-slate-500 mt-1">Encabezado WS-Security firmado mediante certificado digital X.509 de emisor.</p>
+            </div>
+            <div class="bg-slate-50 p-4 rounded border border-slate-200">
+                <div class="text-3xl mb-2">📱</div>
+                <h3 class="font-semibold text-slate-700 mt-0 text-sm">Desafío Cliente Móvil</h3>
+                <p class="text-xs text-slate-500 mt-1">Flutter y Dart carecen de motor nativo para serializar y firmar WS-Security.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Complexity & Strategy Section (Charts) -->
+    <section class="my-8">
+        <h2 class="text-2xl font-bold text-slate-900 mb-3">Análisis de Complejidad Criptográfica y Estrategia</h2>
+        <p class="text-slate-700 text-sm mb-4">
+            Al evaluar el desarrollo del software Novapay para terminales punto de venta (TPV) en Android, iOS y Windows, analizamos el esfuerzo requerido para implementar la pila criptográfica VeriFactu de forma nativa frente a delegarla en un servidor intermedio.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Complexity Analysis -->
+            <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mt-0 mb-2">Anatomía del Problema SOAP</h3>
+                <p class="text-xs text-slate-600 mb-4">
+                    Distribución del esfuerzo de desarrollo en clientes ligeros. Como se observa, la construcción y canonización del sobre de seguridad representa más del 65% de la carga técnica total.
+                </p>
+                <div class="chart-container">
+                    <canvas id="complexityChart"></canvas>
                 </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <button onclick="navigate('dashboard')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition" data-target="dashboard">Dashboard</button>
-                        <button onclick="navigate('libraries')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition" data-target="libraries">Librerías Dart</button>
-                        <button onclick="navigate('services')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition" data-target="services">Servicios SOAP</button>
-                        <button onclick="navigate('simulation')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition" data-target="simulation">Simulador</button>
-                    </div>
+            </div>
+
+            <!-- Strategy Comparison -->
+            <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mt-0 mb-2">Estrategia: Nativo vs. Intermediario</h3>
+                <p class="text-xs text-slate-600 mb-4">
+                    Comparativa de riesgos y mantenibilidad entre intentar empaquetar WS-Security en el cliente Dart vs. desacoplar la firma en un Middleware especializado en Spring Boot.
+                </p>
+                <div class="chart-container">
+                    <canvas id="strategyChart"></canvas>
+                </div>
+                <div class="mt-4 p-3 bg-amber-50 border-l-4 border-amber-500 text-amber-800 text-xs">
+                    <strong>Conclusión Técnica:</strong> Implementar la firma nativa en tablets TPV incrementa la probabilidad de fallos por diferencias entre almacenes de certificados de Android, iOS y Windows. El Middleware centraliza los certificados y garantiza la conformidad tributaria.
                 </div>
             </div>
         </div>
-    </nav>
+    </section>
 
-    <!-- Main Content Area -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <!-- Architecture Diagram -->
+    <section class="my-8">
+        <h2 class="text-2xl font-bold text-slate-900 mb-3">Arquitectura de Integración Novapay</h2>
+        <p class="text-slate-700 text-sm mb-4">
+            El sistema se diseñó utilizando un patrón de arquitectura desacoplada. La aplicación TPV en Flutter envía una petición HTTP/REST ligera con los datos de la venta en formato JSON. El backend Spring Boot valida el DTO, recupera el hash criptográfico de la factura anterior, genera la nueva huella SHA-256 encadenada, aplica la firma digital X.509 utilizando el almacén de claves (KeyStore) de la empresa y realiza la transmisión SOAP con los servidores de la Agencia Tributaria.
+        </p>
 
-        <!-- Introduction Section -->
-        <section class="bg-white rounded-lg p-6 bureaucratic-shadow border border-slate-200">
-            <h1 class="text-3xl font-bold text-slate-900 mb-4">El Reto del "Sobre Perfecto"</h1>
-            <p class="text-lg text-slate-600 mb-6 leading-relaxed">
-                Implementar VeriFactu no es solo enviar datos; es un ejercicio de precisión burocrática. 
-                Imagine enviar una carta certificada donde el sobre (Header SOAP) es más importante que la carta misma (Body). 
-                Un error milimétrico en la firma digital o la estructura XML, y el servidor rechaza todo el envío sin siquiera leer el contenido.
-                Esta guía interactiva desglosa la complejidad técnica para entornos Flutter y presenta las soluciones investigadas.
+        <div class="mermaid">
+            graph LR
+            User((TPV Flutter / App)) -- JSON HTTP/REST --> Middleware[Spring Boot Proxy Novapay]
+            
+            subgraph "Middleware Backend (Java 21)"
+                Middleware -- 1. Valida DTO --> Service[Invoice Service]
+                Service -- 2. Hash SHA-256 --> Hash[Firmador Hash Encadenado]
+                Service -- 3. Firma X.509 --> Cert[Certificado .p12 / KeyStore]
+                Service -- 4. Genera SOAP --> CXF[Cliente SOAP / WSDL]
+            end
+            
+            CXF -- HTTPS / WS-Security --> AEAT((Servidores AEAT VeriFactu))
+
+            style User fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
+            style Middleware fill:#ffecb3,stroke:#fbc02d,stroke-width:2px
+            style Cert fill:#e1bee7,stroke:#714b67,stroke-width:2px
+            style AEAT fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px
+        </div>
+    </section>
+
+    <!-- Interactive Dart Library Arsenal -->
+    <section class="my-8">
+        <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
+            <h2 class="text-2xl font-bold text-slate-900 mt-0 mb-2">Arsenal de Librerías Dart Investigadas</h2>
+            <p class="text-slate-600 mb-4 text-sm">
+                En caso de requerir una ejecución cliente pura ("Hard Mode" sin servidor intermedio), se investigó la compatibilidad y viabilidad de las librerías del ecosistema Dart/Pub.dev para emular la pila SOAP en dispositivos móviles y de escritorio.
             </p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div class="bg-slate-50 p-4 rounded border border-slate-200">
-                    <div class="text-3xl mb-2">📨</div>
-                    <h3 class="font-semibold text-slate-700">Protocolo</h3>
-                    <p class="text-sm text-slate-500">SOAP 1.1 / 1.2 Estricto</p>
-                </div>
-                <div class="bg-slate-50 p-4 rounded border border-slate-200">
-                    <div class="text-3xl mb-2">🔐</div>
-                    <h3 class="font-semibold text-slate-700">Seguridad</h3>
-                    <p class="text-sm text-slate-500">Firma WS-Security (X.509)</p>
-                </div>
-                <div class="bg-slate-50 p-4 rounded border border-slate-200">
-                    <div class="text-3xl mb-2">📱</div>
-                    <h3 class="font-semibold text-slate-700">Desafío Flutter</h3>
-                    <p class="text-sm text-slate-500">Ausencia de soporte nativo SOAP</p>
-                </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <button onclick="showLibDetails('xml')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition active-lib cursor-pointer" data-lib="xml">
+                    <div class="font-bold text-blue-800 text-sm">1. Estructura XML</div>
+                    <div class="text-xs text-slate-500 mt-1">Paquete: `xml`</div>
+                </button>
+                <button onclick="showLibDetails('crypto')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition cursor-pointer" data-lib="crypto">
+                    <div class="font-bold text-blue-800 text-sm">2. Criptografía</div>
+                    <div class="text-xs text-slate-500 mt-1">Paquete: `pointycastle`</div>
+                </button>
+                <button onclick="showLibDetails('transport')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition cursor-pointer" data-lib="transport">
+                    <div class="font-bold text-blue-800 text-sm">3. Transporte HTTP</div>
+                    <div class="text-xs text-slate-500 mt-1">Paquete: `http` / `dio`</div>
+                </button>
+                <button onclick="showLibDetails('utils')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition cursor-pointer" data-lib="utils">
+                    <div class="font-bold text-blue-800 text-sm">4. Certificados</div>
+                    <div class="text-xs text-slate-500 mt-1">Paquete: `pkcs7` / `archive`</div>
+                </button>
             </div>
-        </section>
 
-        <!-- View: Dashboard (Comparison & Strategy) -->
-        <div id="dashboard" class="view-section space-y-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Complexity Analysis -->
-                <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
-                    <h2 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">Anatomía del Problema SOAP</h2>
-                    <p class="text-sm text-slate-600 mb-4">
-                        Desglose del esfuerzo de desarrollo en una implementación nativa. Observe cómo la construcción del "Sobre" (Header/Seguridad) consume la mayoría de recursos frente a la lógica de negocio real.
-                    </p>
-                    <div class="chart-container">
-                        <canvas id="complexityChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Strategy Comparison -->
-                <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
-                    <h2 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">Estrategia: Nativo vs. Intermediario</h2>
-                    <p class="text-sm text-slate-600 mb-4">
-                        Comparativa entre implementar toda la pila SOAP en Dart (Flutter) o utilizar un Backend intermedio (Python/Node/Java) que gestione la firma.
-                    </p>
-                    <div class="chart-container">
-                        <canvas id="strategyChart"></canvas>
-                    </div>
-                    <div class="mt-4 p-4 bg-amber-50 border-l-4 border-amber-500 text-amber-800 text-sm">
-                        <strong>Recomendación:</strong> El servidor intermedio reduce drásticamente el riesgo de errores de firma en dispositivos fragmentados (tablets Windows/Android).
-                    </div>
-                </div>
+            <div id="lib-content-area" class="bg-slate-50 p-6 rounded border border-slate-200 min-h-[200px]">
+                <!-- Dynamic Content populated by JS -->
             </div>
         </div>
+    </section>
 
-        <!-- View: Libraries (The Solution) -->
-        <div id="libraries" class="view-section hidden space-y-8">
-            <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">Arsenal Dart para VeriFactu</h2>
-                <p class="text-slate-600 mb-6">
-                    Investigación de librerías Dart compatibles con Windows y Móvil para una implementación pura ("Hard Mode"). 
-                    Estas son las herramientas necesarias para construir el XML y firmarlo manualmente.
+    <!-- Services Table -->
+    <section class="my-8">
+        <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
+            <h2 class="text-2xl font-bold text-slate-900 mt-0 mb-2">Servicios Web SOAP Definidos por la AEAT</h2>
+            <p class="text-slate-600 mb-4 text-sm">
+                La normativa VeriFactu establece un conjunto estandarizado de servicios web definidos por archivos WSDL. En el flujo operativo habitual de un TPV Novapay, cada tipo de evento en caja activa una llamada a la operación correspondiente:
+            </p>
+
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Servicio (WSDL)</th>
+                        <th>Operación</th>
+                        <th>Función Operativa TPV / Novapay</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code class="text-indigo-700">SuministroFacturas</code></td>
+                        <td><strong>AltaFactu</strong></td>
+                        <td>Envío e inscripción inmediata del registro de facturación de expedición al completar un cobro de venta.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="text-indigo-700">SuministroFacturas</code></td>
+                        <td><strong>AnulacionFactu</strong></td>
+                        <td>Registro de anulación o corrección de facturas emitidas por error o devolución de mercadería.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="text-indigo-700">Consultas</code></td>
+                        <td><strong>ConsultaLRFacturas</strong></td>
+                        <td>Auditoría y cotejo periódico entre la base de datos local del negocio y los libros de la AEAT.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="text-indigo-700">Verificacion</code></td>
+                        <td><strong>Veri*Factu</strong></td>
+                        <td>Validación externa de la huella digital y el código QR impreso en el ticket o factura recibida por el cliente.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="mt-6 bg-blue-50 p-4 rounded-md border border-blue-100">
+                <h4 class="font-bold text-blue-900 mb-1 text-sm">🔍 Detalle de Seguridad Criptográfica</h4>
+                <p class="text-xs text-blue-800 m-0 leading-relaxed">
+                    Cada petición transmitida debe incrustar la marca temporal de envío y el bloque <code>ds:Signature</code>. El encadenamiento se garantiza introduciendo la huella SHA-256 de la factura inmediatamente anterior como parámetro de entrada obligatorio del registro actual.
                 </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <button onclick="showLibDetails('xml')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition active-lib" data-lib="xml">
-                        <div class="font-bold text-blue-800">1. Estructura XML</div>
-                        <div class="text-xs text-slate-500 mt-1">Paquete: `xml`</div>
-                    </button>
-                    <button onclick="showLibDetails('crypto')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition" data-lib="crypto">
-                        <div class="font-bold text-blue-800">2. Criptografía</div>
-                        <div class="text-xs text-slate-500 mt-1">Paquete: `pointycastle`</div>
-                    </button>
-                    <button onclick="showLibDetails('transport')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition" data-lib="transport">
-                        <div class="font-bold text-blue-800">3. Transporte</div>
-                        <div class="text-xs text-slate-500 mt-1">Paquete: `http` / `dio`</div>
-                    </button>
-                    <button onclick="showLibDetails('utils')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition" data-lib="utils">
-                        <div class="font-bold text-blue-800">4. Utilidades</div>
-                        <div class="text-xs text-slate-500 mt-1">Paquete: `archive`</div>
-                    </button>
-                </div>
-
-                <div id="lib-content-area" class="bg-slate-50 p-6 rounded border border-slate-200 min-h-[200px]">
-                    <!-- Dynamic Content populated by JS -->
-                </div>
             </div>
         </div>
+    </section>
 
-        <!-- View: Services (Technical Specs) -->
-        <div id="services" class="view-section hidden space-y-8">
+    <!-- Interactive Envelope Simulator -->
+    <section class="my-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">Servicios Web Definidos</h2>
-                <p class="text-slate-600 mb-6">
-                    Para un TPV, estos son los endpoints y operaciones críticas que deben implementarse. 
-                    El sistema distingue entre el entorno de pruebas y producción.
+                <h2 class="text-xl font-bold text-slate-800 mt-0 mb-2">Simulador Interactivo de "Sobre" SOAP</h2>
+                <p class="text-xs text-slate-600 mb-4">
+                    Experimente la rigidez del protocolo WS-Security. Haga clic en las etiquetas para construir la jerarquía del encabezado SOAP. El validador simula la verificación que ejecutan los servidores de la Agencia Tributaria.
                 </p>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-left text-sm whitespace-nowrap">
-                        <thead class="uppercase tracking-wider border-b-2 border-slate-200 bg-slate-100">
-                            <tr>
-                                <th scope="col" class="px-6 py-4 text-slate-600 font-bold">Servicio (WSDL)</th>
-                                <th scope="col" class="px-6 py-4 text-slate-600 font-bold">Operación</th>
-                                <th scope="col" class="px-6 py-4 text-slate-600 font-bold">Función TPV</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 font-medium">
-                            <tr class="hover:bg-blue-50 transition">
-                                <td class="px-6 py-4 text-indigo-700">SuministroFacturas</td>
-                                <td class="px-6 py-4">AltaFactu</td>
-                                <td class="px-6 py-4 text-slate-600">Envío de registros de facturación (Ventas).</td>
-                            </tr>
-                            <tr class="hover:bg-blue-50 transition">
-                                <td class="px-6 py-4 text-indigo-700">SuministroFacturas</td>
-                                <td class="px-6 py-4">AnulacionFactu</td>
-                                <td class="px-6 py-4 text-slate-600">Corrección o anulación de registros previos.</td>
-                            </tr>
-                            <tr class="hover:bg-blue-50 transition">
-                                <td class="px-6 py-4 text-indigo-700">Consultas</td>
-                                <td class="px-6 py-4">ConsultaLRFacturas</td>
-                                <td class="px-6 py-4 text-slate-600">Verificar estado de facturas enviadas.</td>
-                            </tr>
-                             <tr class="hover:bg-blue-50 transition">
-                                <td class="px-6 py-4 text-indigo-700">Verificacion</td>
-                                <td class="px-6 py-4">Veri*Factu</td>
-                                <td class="px-6 py-4 text-slate-600">Comprobación de integridad y encadenamiento.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                
+                <div class="flex flex-wrap gap-2 mb-4" id="soap-components">
+                    <button class="comp-btn px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded text-xs mono transition font-semibold cursor-pointer" data-val="<soap:Header>">&lt;Header&gt;</button>
+                    <button class="comp-btn px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded text-xs mono transition font-semibold cursor-pointer" data-val="<wsse:Security>">&lt;Security&gt;</button>
+                    <button class="comp-btn px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded text-xs mono transition font-semibold cursor-pointer" data-val="<ds:Signature>">&lt;Signature&gt;</button>
+                    <button class="comp-btn px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded text-xs mono transition font-semibold cursor-pointer" data-val="</wsse:Security>">&lt;/Security&gt;</button>
+                    <button class="comp-btn px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded text-xs mono transition font-semibold cursor-pointer" data-val="</soap:Header>">&lt;/Header&gt;</button>
                 </div>
 
-                <div class="mt-6 bg-blue-50 p-4 rounded-md border border-blue-100">
-                    <h4 class="font-bold text-blue-900 mb-2">🔍 Detalle de Seguridad</h4>
-                    <p class="text-sm text-blue-800">
-                        Cada petición debe incluir un encabezado <strong>WS-Security</strong> firmado con el certificado digital del emisor. 
-                        El huella digital (Checksum) de la factura anterior debe incluirse en la actual para garantizar el encadenamiento inalterable.
-                    </p>
+                <div class="bg-slate-900 text-green-400 p-4 rounded mono text-xs min-h-[150px] mb-4 overflow-auto shadow-inner" id="soap-editor">
+                    <!-- Code appears here -->
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <button onclick="resetSim()" class="text-xs text-red-600 hover:underline font-semibold cursor-pointer">Reiniciar</button>
+                    <button onclick="validateSoap()" class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded transition font-bold text-sm cursor-pointer">Enviar a VeriFactu</button>
                 </div>
             </div>
-        </div>
 
-        <!-- View: Simulation (Interactive Strictness) -->
-        <div id="simulation" class="view-section hidden space-y-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
-                    <h2 class="text-xl font-bold text-slate-800 mb-4">Simulador de "Sobre" SOAP</h2>
-                    <p class="text-sm text-slate-600 mb-6">
-                        Intente generar un Header SOAP válido. El sistema VeriFactu rechazará cualquier desviación del formato estricto.
-                        <br><i>Haga clic en los componentes para ensamblarlos.</i>
-                    </p>
-                    
-                    <div class="flex flex-wrap gap-2 mb-6" id="soap-components">
-                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="<soap:Header>">&lt;Header&gt;</button>
-                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="<wsse:Security>">&lt;Security&gt;</button>
-                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="<ds:Signature>">&lt;Signature&gt;</button>
-                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="</wsse:Security>">&lt;/Security&gt;</button>
-                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="</soap:Header>">&lt;/Header&gt;</button>
-                    </div>
-
-                    <div class="bg-slate-900 text-green-400 p-4 rounded font-mono text-xs min-h-[150px] mb-4 overflow-auto" id="soap-editor">
-                        <!-- Code appears here -->
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <button onclick="resetSim()" class="text-xs text-red-500 hover:underline">Reiniciar</button>
-                        <button onclick="validateSoap()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-bold">Enviar a VeriFactu</button>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200 flex flex-col justify-center items-center text-center" id="validation-result">
-                    <div class="text-6xl mb-4 text-gray-300">📬</div>
-                    <h3 class="text-xl font-bold text-gray-400">Esperando envío...</h3>
-                    <p class="text-sm text-gray-400 mt-2">Configure el encabezado correctamente.</p>
-                </div>
+            <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200 flex flex-col justify-center items-center text-center" id="validation-result">
+                <div class="text-6xl mb-3 text-slate-300">📬</div>
+                <h3 class="text-xl font-bold text-slate-400 mt-0">Esperando envío...</h3>
+                <p class="text-sm text-slate-400 mt-2">Configure el encabezado en el orden jerárquico estricto exigido por la AEAT.</p>
             </div>
         </div>
+    </section>
 
-    </main>
+    <!-- Bottom Actions & Shared Footer -->
+    <div class="manual-bottom-actions">
+        <a href="../index.html" class="manual-back">← Volver a la portada</a>
+        <a href="#top" class="manual-top">↑ Volver arriba</a>
+    </div>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
-            <p>© 2024 Guía de Implementación Técnica VeriFactu.</p>
-            <p class="mt-2 text-xs">Basado en requisitos de la AEAT (Agencia Tributaria Española).</p>
-        </div>
-    </footer>
+    <div class="footer">
+        Biblioteca técnica de <a href="https://aaronsgomez.es" target="_blank" rel="noopener">AaronSGomez</a> / <a href="https://github.com/AaronSGomez" target="_blank" rel="noopener">Github</a> &copy; 2026
+    </div>
 
-    <script>
-        // --- State Management ---
-        const state = {
-            currentTab: 'dashboard',
-            currentLib: 'xml',
-            soapBuffer: []
-        };
+</div>
 
-        // --- Data Sources (Content) ---
-        const libDetails = {
-            xml: {
-                title: "Paquete `xml`",
-                desc: "Esencial para construir el cuerpo y el encabezado del mensaje SOAP. Flutter no tiene un serializador SOAP nativo, por lo que debes construir el árbol DOM XML manualmente.",
-                code: "dependencies:\n  xml: ^6.5.0\n\n// Uso:\nfinal builder = XmlBuilder();\nbuilder.element('soap:Envelope', nest: () { ... });",
-                pros: "Control total, Puro Dart (Windows/iOS/Android).",
-                cons: "Verborreico, propenso a errores humanos."
-            },
-            crypto: {
-                title: "Paquete `pointycastle` / `encrypt`",
-                desc: "El corazón de la dificultad. Necesario para firmar el XML (XML-DSIG). Debes calcular el hash SHA-256 del body, canonizarlo y firmarlo con la clave privada del certificado .p12.",
-                code: "dependencies:\n  pointycastle: ^3.7.0\n  encrypt: ^5.0.0\n\n// Nota: Requiere implementación manual de algoritmos de canonización (C14N).",
-                pros: "Estándar en Dart para criptografía.",
-                cons: "Curva de aprendizaje muy alta. Implementar XML-DSIG desde cero es complejo."
-            },
-            transport: {
-                title: "Paquete `http` / `dio`",
-                desc: "Se encarga de enviar la cadena XML finalizada mediante POST. Debe manejar certificados SSL/TLS si el servidor lo requiere, y configurar los headers HTTP (Content-Type: text/xml).",
-                code: "dependencies:\n  http: ^1.1.0\n\n// Header Crítico:\n{'Content-Type': 'text/xml; charset=utf-8',\n 'SOAPAction': '...'}",
-                pros: "Fácil de usar, robusto.",
-                cons: "Ninguno, es la parte fácil."
-            },
-            utils: {
-                title: "Manejo de Certificados",
-                desc: "Para leer archivos .p12 (PKCS#12) en la tablet o Windows, necesitas acceder al sistema de archivos y parsear los binarios del certificado para extraer la clave privada.",
-                code: "dependencies:\n  pkcs7: ^0.4.0 (Experimental)\n\n// Estrategia:\n// Convertir .p12 a PEM previamente si es posible para facilitar la lectura en Dart.",
-                pros: "Independencia del OS.",
-                cons: "Gestión de claves segura en memoria es delicada."
+<!-- Mobile Floating Controls -->
+<div class="mobile-scroll-controls" aria-label="Controles de desplazamiento">
+    <a href="../index.html" title="Volver a la portada">🏠</a>
+    <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" title="Volver arriba">↑</button>
+</div>
+
+<script>
+    // --- State Management ---
+    const state = {
+        currentLib: 'xml',
+        soapBuffer: []
+    };
+
+    // --- Data Sources (Dart Libraries) ---
+    const libDetails = {
+        xml: {
+            title: "Paquete `xml` (DOM Serializer)",
+            desc: "Esencial para construir la estructura de nodos del documento XML y la envoltura SOAP. Dado que Flutter carece de serializadores SOAP declarativos nativos, el árbol de etiquetas debe modelarse nodo a nodo.",
+            code: "dependencies:\n  xml: ^6.5.0\n\n// Ejemplo de construcción:\nfinal builder = XmlBuilder();\nbuilder.element('soap:Envelope', nest: () {\n  builder.attribute('xmlns:soap', 'http://schemas.xmlsoap.org/soap/envelope/');\n});",
+            pros: "Biblioteca ligera, 100% código Dart puro multiplataforma (Windows, Android, iOS).",
+            cons: "Requiere código imperativo verboso y propenso a errores tipográficos en los namespaces."
+        },
+        crypto: {
+            title: "Paquete `pointycastle` / `encrypt`",
+            desc: "El punto crítico de complejidad. Se requiere para calcular el hash digest SHA-256 del bloque de datos y generar la firma digital RSA sobre el nodo canonizado (C14N) según la especificación XML-DSIG.",
+            code: "dependencies:\n  pointycastle: ^3.7.0\n  encrypt: ^5.0.0\n\n// Nota: La canonización C14N exige transformar el XML a una representación binaria normalizada.",
+            pros: "Es el estándar criptográfico más completo mantenido en el ecosistema Dart.",
+            cons: "Elevada curva de aprendizaje e impacto sustancial en el hilo principal de ejecución UI."
+        },
+        transport: {
+            title: "Paquete `http` / `dio`",
+            desc: "Gestión de la capa de transporte HTTPS. Encargado de realizar la petición HTTP POST hacia la URL del WSDL de la AEAT, inyectando los encabezados requeridos (Content-Type: text/xml; charset=utf-8).",
+            code: "dependencies:\n  http: ^1.1.0\n\n// Encabezados requeridos:\nfinal headers = {\n  'Content-Type': 'text/xml; charset=utf-8',\n  'SOAPAction': 'http://www.agenciatributaria.es/.../AltaFactu'\n};",
+            pros: "Cliente HTTP altamente probado, maduro y fácil de configurar.",
+            cons: "La autenticación por certificado de cliente (mTLS) exige configuración nativa por SO."
+        },
+        utils: {
+            title: "Manejo de Certificados (`pkcs7` / `archive`)",
+            desc: "Necesario para abrir y parsear archivos de certificado digital PKCS#12 (.p12) guardados en el almacenamiento del dispositivo, extrayendo la clave privada RSA y la cadena de certificados X.509.",
+            code: "dependencies:\n  pkcs7: ^0.4.0\n\n// Lectura del almacén de claves de la empresa para la firma electrónica.",
+            pros: "Permite importar directamente el certificado empresarial sin depender del instalador del SO.",
+            cons: "Exige implementar medidas adicionales para proteger la clave privada almacenada en memoria RAM."
+        }
+    };
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        initCharts();
+        renderLibDetail('xml');
+        setupSim();
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { curve: 'basis' } });
+    });
+
+    // --- Library Explorer Logic ---
+    function showLibDetails(libKey) {
+        state.currentLib = libKey;
+        document.querySelectorAll('.lib-btn').forEach(btn => {
+            if(btn.dataset.lib === libKey) {
+                btn.classList.add('bg-blue-50', 'border-blue-500');
+                btn.classList.remove('border-transparent');
+            } else {
+                btn.classList.remove('bg-blue-50', 'border-blue-500');
+                btn.classList.add('border-transparent');
             }
-        };
-
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            initCharts();
-            renderLibDetail('xml');
-            setupNav();
-            setupSim();
         });
+        renderLibDetail(libKey);
+    }
 
-        // --- Navigation Logic ---
-        function navigate(targetId) {
-            // Hide all sections
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            // Show target
-            document.getElementById(targetId).classList.remove('hidden');
-            
-            // Update buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.dataset.target === targetId) {
-                    btn.classList.add('bg-slate-700', 'text-white');
-                    btn.classList.remove('text-slate-300');
-                } else {
-                    btn.classList.remove('bg-slate-700', 'text-white');
-                    btn.classList.add('text-slate-300');
-                }
-            });
-            state.currentTab = targetId;
-        }
-
-        function setupNav() {
-            // Initial state
-            navigate('dashboard');
-        }
-
-        // --- Library Explorer Logic ---
-        function showLibDetails(libKey) {
-            state.currentLib = libKey;
-            
-            // Update UI styles
-            document.querySelectorAll('.lib-btn').forEach(btn => {
-                if(btn.dataset.lib === libKey) {
-                    btn.classList.add('bg-blue-50', 'border-blue-500');
-                    btn.classList.remove('border-transparent');
-                } else {
-                    btn.classList.remove('bg-blue-50', 'border-blue-500');
-                    btn.classList.add('border-transparent');
-                }
-            });
-
-            renderLibDetail(libKey);
-        }
-
-        function renderLibDetail(key) {
-            const data = libDetails[key];
-            const container = document.getElementById('lib-content-area');
-            container.innerHTML = `
-                <h3 class="text-xl font-bold text-slate-800 mb-2">${data.title}</h3>
-                <p class="text-slate-700 mb-4">${data.desc}</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div class="bg-green-50 p-3 rounded border border-green-200">
-                        <span class="font-bold text-green-800">Ventaja:</span> <span class="text-green-700 text-sm">${data.pros}</span>
-                    </div>
-                    <div class="bg-red-50 p-3 rounded border border-red-200">
-                        <span class="font-bold text-red-800">Dificultad:</span> <span class="text-red-700 text-sm">${data.cons}</span>
-                    </div>
+    function renderLibDetail(key) {
+        const data = libDetails[key];
+        const container = document.getElementById('lib-content-area');
+        container.innerHTML = `
+            <h3 class="text-xl font-bold text-slate-800 mt-0 mb-2">${data.title}</h3>
+            <p class="text-slate-700 mb-4 text-xs leading-relaxed">${data.desc}</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="bg-green-50 p-3 rounded border border-green-200">
+                    <span class="font-bold text-green-800 text-xs">Ventaja:</span> <span class="text-green-700 text-xs">${data.pros}</span>
                 </div>
-                <div class="bg-slate-800 text-slate-200 p-4 rounded font-mono text-sm overflow-x-auto">
-                    <pre>${data.code}</pre>
+                <div class="bg-red-50 p-3 rounded border border-red-200">
+                    <span class="font-bold text-red-800 text-xs">Dificultad:</span> <span class="text-red-700 text-xs">${data.cons}</span>
                 </div>
-            `;
-        }
+            </div>
+            <div class="bg-slate-800 text-slate-200 p-4 rounded mono text-xs overflow-x-auto">
+                <pre>${data.code}</pre>
+            </div>
+        `;
+    }
 
-        // --- Chart.js Implementations ---
-        function initCharts() {
-            // Chart 1: Complexity (Doughnut)
-            const ctx1 = document.getElementById('complexityChart').getContext('2d');
-            new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Construcción Header (Seguridad/Firma)', 'Lógica de Negocio (Datos Factura)', 'Transporte HTTP'],
-                    datasets: [{
-                        data: [65, 25, 10],
-                        backgroundColor: ['#b91c1c', '#3b82f6', '#10b981'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.label + ': ' + context.raw + '% esfuerzo';
-                                }
+    // --- Chart.js Implementations ---
+    function initCharts() {
+        // Chart 1: Complexity (Doughnut)
+        const ctx1 = document.getElementById('complexityChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: ['Construcción Header (WS-Security & Firma)', 'Lógica de Negocio (Ventas/Impuestos)', 'Transporte HTTP/TLS'],
+                datasets: [{
+                    data: [65, 25, 10],
+                    backgroundColor: ['#b91c1c', '#3b82f6', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ' ' + context.label + ': ' + context.raw + '% esfuerzo';
                             }
                         }
                     }
                 }
-            });
+            }
+        });
 
-            // Chart 2: Strategy Comparison (Bar)
-            const ctx2 = document.getElementById('strategyChart').getContext('2d');
-            new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: ['Desarrollo Inicial', 'Complejidad Mantenimiento', 'Riesgo de Errores'],
-                    datasets: [
-                        {
-                            label: 'Nativo (Solo Dart)',
-                            data: [90, 80, 85],
-                            backgroundColor: '#ef4444'
-                        },
-                        {
-                            label: 'Con Backend Intermedio',
-                            data: [40, 30, 20],
-                            backgroundColor: '#22c55e'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Nivel de Impacto (%)' } }
+        // Chart 2: Strategy Comparison (Bar)
+        const ctx2 = document.getElementById('strategyChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Desarrollo Inicial', 'Complejidad Mantenimiento', 'Riesgo de Rechazo AEAT'],
+                datasets: [
+                    {
+                        label: 'Nativo (Solo Dart en Cliente)',
+                        data: [90, 80, 85],
+                        backgroundColor: '#ef4444'
                     },
-                    plugins: {
-                        legend: { position: 'bottom' }
+                    {
+                        label: 'Con Middleware (Spring Boot)',
+                        data: [40, 30, 20],
+                        backgroundColor: '#22c55e'
                     }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, max: 100, title: { display: true, text: 'Nivel de Impacto (%)' } }
+                },
+                plugins: {
+                    legend: { position: 'bottom' }
                 }
-            });
-        }
-
-        // --- Simulation Logic ---
-        function setupSim() {
-            const buttons = document.querySelectorAll('.comp-btn');
-            const editor = document.getElementById('soap-editor');
-
-            buttons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const val = btn.dataset.val;
-                    state.soapBuffer.push(val);
-                    renderEditor();
-                });
-            });
-        }
-
-        function renderEditor() {
-            const editor = document.getElementById('soap-editor');
-            if(state.soapBuffer.length === 0) {
-                editor.innerHTML = '<span class="text-gray-500">// Seleccione componentes arriba</span>';
-                return;
             }
-            // Simple indentation simulation
-            let html = '';
-            let indent = 0;
-            state.soapBuffer.forEach(tag => {
-                if(tag.startsWith('</')) indent = Math.max(0, indent - 1);
-                html += '&nbsp;&nbsp;'.repeat(indent) + escapeHtml(tag) + '<br>';
-                if(!tag.startsWith('</') && !tag.endsWith('/>')) indent++;
+        });
+    }
+
+    // --- Simulation Logic ---
+    function setupSim() {
+        const buttons = document.querySelectorAll('.comp-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const val = btn.dataset.val;
+                state.soapBuffer.push(val);
+                renderEditor();
             });
-            editor.innerHTML = html;
-        }
+        });
+    }
 
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    function renderEditor() {
+        const editor = document.getElementById('soap-editor');
+        if(state.soapBuffer.length === 0) {
+            editor.innerHTML = '<span class="text-slate-500">// Haga clic en los componentes arriba para ensamblar el encabezado SOAP</span>';
+            return;
         }
+        let html = '';
+        let indent = 0;
+        state.soapBuffer.forEach(tag => {
+            if(tag.startsWith('</')) indent = Math.max(0, indent - 1);
+            html += '&nbsp;&nbsp;'.repeat(indent) + escapeHtml(tag) + '<br>';
+            if(!tag.startsWith('</') && !tag.endsWith('/>')) indent++;
+        });
+        editor.innerHTML = html;
+    }
 
-        function resetSim() {
-            state.soapBuffer = [];
-            renderEditor();
-            document.getElementById('validation-result').innerHTML = `
-                <div class="text-6xl mb-4 text-gray-300">📬</div>
-                <h3 class="text-xl font-bold text-gray-400">Esperando envío...</h3>
-                <p class="text-sm text-gray-400 mt-2">Configure el encabezado correctamente.</p>
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function resetSim() {
+        state.soapBuffer = [];
+        renderEditor();
+        document.getElementById('validation-result').innerHTML = `
+            <div class="text-6xl mb-3 text-slate-300">📬</div>
+            <h3 class="text-xl font-bold text-slate-400 mt-0">Esperando envío...</h3>
+            <p class="text-sm text-slate-400 mt-2">Configure el encabezado en el orden jerárquico estricto exigido por la AEAT.</p>
+        `;
+        document.getElementById('validation-result').className = "bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200 flex flex-col justify-center items-center text-center";
+    }
+
+    function validateSoap() {
+        const correctSequence = ["<soap:Header>", "<wsse:Security>", "<ds:Signature>", "</wsse:Security>", "</soap:Header>"];
+        const current = state.soapBuffer;
+        const resDiv = document.getElementById('validation-result');
+
+        const isCorrect = JSON.stringify(current) === JSON.stringify(correctSequence);
+
+        if (isCorrect) {
+            resDiv.className = "bg-green-50 p-6 rounded-lg border-2 border-green-500 flex flex-col justify-center items-center text-center";
+            resDiv.innerHTML = `
+                <div class="text-6xl mb-3">✅</div>
+                <h3 class="text-xl font-bold text-green-700 mt-0">Envío Aceptado</h3>
+                <p class="text-sm text-green-600 mt-2">El sobre cumple con la especificación WS-Security y la canonización de la Agencia Tributaria.</p>
             `;
-            document.getElementById('validation-result').className = "bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200 flex flex-col justify-center items-center text-center";
+        } else {
+            resDiv.className = "bg-red-50 p-6 rounded-lg border-2 border-red-500 flex flex-col justify-center items-center text-center";
+            resDiv.innerHTML = `
+                <div class="text-6xl mb-3">🚫</div>
+                <h3 class="text-xl font-bold text-red-700 mt-0">Rechazo Burocrático (HTTP 500 / Invalid WS-Security Header)</h3>
+                <p class="text-sm text-red-600 mt-2">Error de esquema. El servidor rechaza la petición sin procesar el cuerpo XML.<br>Orden requerido: Header > Security > Signature.</p>
+            `;
         }
+    }
+</script>
 
-        function validateSoap() {
-            const correctSequence = ["<soap:Header>", "<wsse:Security>", "<ds:Signature>", "</wsse:Security>", "</soap:Header>"];
-            const current = state.soapBuffer;
-            const resDiv = document.getElementById('validation-result');
-
-            // Check specific strict order
-            const isCorrect = JSON.stringify(current) === JSON.stringify(correctSequence);
-
-            if (isCorrect) {
-                resDiv.className = "bg-green-50 p-6 rounded-lg border-2 border-green-500 flex flex-col justify-center items-center text-center";
-                resDiv.innerHTML = `
-                    <div class="text-6xl mb-4">✅</div>
-                    <h3 class="text-xl font-bold text-green-700">Envío Aceptado</h3>
-                    <p class="text-sm text-green-600 mt-2">El sobre cumple con la estricta normativa SOAP de VeriFactu.</p>
-                `;
-            } else {
-                resDiv.className = "bg-red-50 p-6 rounded-lg border-2 border-red-500 flex flex-col justify-center items-center text-center";
-                resDiv.innerHTML = `
-                    <div class="text-6xl mb-4">🚫</div>
-                    <h3 class="text-xl font-bold text-red-700">Rechazo Burocrático</h3>
-                    <p class="text-sm text-red-600 mt-2">Error de formato. El servidor no leerá el contenido.<br>Orden esperado: Header > Security > Signature.</p>
-                `;
-            }
-        }
-
-    </script>
 </body>
 </html>

@@ -1,37 +1,46 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Odoo Dockerizado GUIA</title>
+    <title>Odoo Dockerizado GUIA | Despliegue & Microservicios</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <link rel="stylesheet" href="../css/paginas.css">
 </head>
-<body>
+<body id="top">
 
 <div class="document-page">
 
-    <h1>Proyecto: Migración de ERP a Microservicios</h1>
+    <div class="manual-actions">
+        <a href="../index.html" class="manual-back">← Volver al índice</a>
+    </div>
+
+    <h1>Proyecto: Migración de ERP Odoo a Microservicios Contenedorizados</h1>
     <p>
         <span class="badge">Docker Compose</span>
+        <span class="badge">PostgreSQL 15</span>
         <span class="badge">Apache Reverse Proxy</span>
         <span class="badge">SSL/TLS</span>
-        <span class="badge">Raspberry Pi Server</span>
     </p>
 
     <div class="note">
-        <strong>Resumen Técnico:</strong> Documentación de la implementación de Odoo ERP mediante arquitectura de contenedores, incluyendo persistencia de datos y seguridad SSL automatizada.
+        <strong>Resumen Técnico:</strong> Documentación detallada de la arquitectura, persistencia de datos y despliegue del sistema ERP Odoo 16 mediante la contenedorización con Docker Compose, aislando la base de datos relacional en una red privada virtual y publicando el servicio con cifrado SSL automatizado a través de Apache.
     </div>
 
-    <h2>1. Arquitectura Lógica</h2>
-    <p>El sistema desacopla la base de datos de la aplicación mediante una red interna de Docker, exponiendo solo el puerto seguro a internet a través de Apache.</p>
+    <h2>1. Arquitectura Lógica de Aislamiento de Red</h2>
+    <p>
+        En instalaciones tradicionales monolíticas, la aplicación web y el gestor de base de datos se ejecutan en el mismo sistema operativo compartiendo espacio de puertos. En nuestra arquitectura orientada a microservicios, desacoplamos la aplicación web <strong>Odoo 16</strong> de la base de datos relacional <strong>PostgreSQL 15</strong> en contenedores Docker independientes.
+    </p>
+    <p>
+        Ambos contenedores se comunican exclusivamente a través de una red privada virtual de Docker. El puerto <code>5432</code> de PostgreSQL no se expone hacia el servidor host ni hacia internet, impidiendo cualquier intento de conexión externa no autorizada a la base de datos relacional. El único punto de entrada autorizado es el Proxy Inverso Apache en el puerto seguro 443.
+    </p>
     
     <div class="mermaid">
     graph LR
         User((Usuario Remoto)) -- HTTPS/443 --> Apache[Apache Proxy Inverso]
-        subgraph "Servidor Host - Docker Network"
-            Apache -- Port 8069 --> Odoo[Contenedor Odoo Web]
-            Odoo -- Port 5432 --> DB[(Contenedor PostgreSQL)]
+        subgraph "Servidor Host - Docker Network (Aislada)"
+            Apache -- Port 8069 --> Odoo[Contenedor Odoo Web :8069]
+            Odoo -- Port 5432 (Interno) --> DB[(Contenedor PostgreSQL :5432)]
         end
         style Apache fill:#ffecb3,stroke:#fbc02d,stroke-width:2px
         style Odoo fill:#e1bee7,stroke:#714b67,stroke-width:2px
@@ -39,33 +48,40 @@
     </div>
 
     <h2>2. Infraestructura como Código (Docker Compose)</h2>
-    <p>Definición del stack de servicios. Se utilizan volúmenes nombrados para garantizar que los datos no se pierdan al reiniciar los contenedores.</p>
+    <p>
+        La especificación de servicios se declara en el fichero <code>docker-compose.yml</code>. Para garantizar la inalterabilidad de la información contable y los módulos personalizados, se utilizan <strong>volúmenes nombrados</strong> (<code>odoo-web-data</code> y <code>odoo-db-data</code>) que mapean las rutas de almacenamiento fuera del ciclo de vida del contenedor.
+    </p>
+    <p>
+        Además, se incluye el montaje de directorio <code>./addons:/mnt/extra-addons</code> para permitir la inyección de módulos personalizados desarrollados en Python sin necesidad de reconstruir la imagen de Docker. La directiva <code>restart: always</code> garantiza que en caso de reinicio del servidor físico (Raspberry Pi / Linux), la pila de servicios vuelva a estar operativa de forma autónoma.
+    </p>
     
-    <div class="file-header">📄 docker-compose.yml</div>
+    <div class="file-header">📄 docker-compose.yml (Stack Odoo + PostgreSQL)</div>
     <div class="file-content">version: '3.1'
 
 services:
   web:
     image: odoo:16.0
+    container_name: odoo_web
     depends_on:
       - db
     ports:
-      - "8069:8069"
+      - "127.0.0.1:8069:8069" # Expuesto solo a localhost para Apache
     volumes:
       - odoo-web-data:/var/lib/odoo
       - ./addons:/mnt/extra-addons
     environment:
       - HOST=db
-      - USER=odoo 
-      - PASSWORD=tu_contrasena_segura  # Cambiar en producción
+      - USER=odoo
+      - PASSWORD=tu_contrasena_segura
     restart: always
 
   db:
-    image: postgres:15
+    image: postgres:15-alpine
+    container_name: odoo_postgres
     environment:
       - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD=tu_contrasena_segura # Debe coincidir con la de Odoo
       - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=tu_contrasena_segura
     volumes:
       - odoo-db-data:/var/lib/postgresql/data
     restart: always
@@ -74,38 +90,44 @@ volumes:
   odoo-web-data:
   odoo-db-data:</div>
 
-    <h2>3. Comandos de Despliegue y Arranque</h2>
-    <p>Pasos ejecutados en la terminal del servidor para levantar la infraestructura.</p>
+    <h2>3. Comandos de Despliegue y Operativa en Terminal</h2>
+    <p>
+        Secuencia de órdenes ejecutadas en la consola del servidor para la puesta en marcha de la infraestructura. El parámetro <code>-d</code> levanta los contenedores en segundo plano (modo desatendido o *detached*).
+    </p>
 
     <div class="terminal">
-        <span class="comment"># 1. Crear directorio de trabajo</span>
-        <div class="cmd">mkdir -p ~/docker-apps/odoo</div>
-        <div class="cmd">cd ~/docker-apps/odoo</div>
+        <span class="comment"># 1. Crear directorio de trabajo para el proyecto</span>
+        <div class="cmd">mkdir -p ~/docker-apps/odoo && cd ~/docker-apps/odoo</div>
 
-        <span class="comment"># 2. Crear y editar el fichero de configuración (pegar contenido de arriba)</span>
-        <span class="comment"># Nota: También puedes crearlo desde VS Code y usar la terminal integrada</span>
+        <span class="comment"># 2. Crear y guardar el fichero docker-compose.yml</span>
         <div class="cmd">nano docker-compose.yml</div>
         
-        <span class="comment"># 3. Arrancar los contenedores en segundo plano (Detached)</span>
+        <span class="comment"># 3. Arrancar el stack en segundo plano</span>
         <div class="cmd">docker compose up -d</div>
 
-        <span class="comment"># 4. Verificar estado y logs</span>
+        <span class="comment"># 4. Verificar el estado de ejecución de los contenedores</span>
         <div class="cmd">docker compose ps</div>
+
+        <span class="comment"># 5. Monitorizar los logs en tiempo real para verificar la inicialización de la BD</span>
         <div class="cmd">docker compose logs -f</div>
     </div>
 
-    <h2>4. Configuración del Proxy Inverso</h2>
-    <p>Apache gestiona la redirección del subdominio hacia el puerto local de Docker.</p>
+    <h2>4. Configuración del Proxy Inverso (Apache VirtualHost)</h2>
+    <p>
+        El servidor web Apache actúa como frontal seguro. Su responsabilidad es recibir las peticiones encaminadas al subdominio <code>miproyecto-erp.duckdns.org</code> por el puerto 80/443 y transmitirlas mediante <code>ProxyPass</code> hacia el servicio interno <code>http://localhost:8069/</code>.
+    </p>
+    <p>
+        La directiva <code>ProxyPreserveHost On</code> es crítica: asegura que el nombre de dominio original enviado por el usuario se transmita intacto a Odoo, lo que permite la correcta generación de enlaces de cookies de sesión, redirecciones y recursos estáticos.
+    </p>
 
     <div class="file-header">📄 /etc/apache2/sites-available/odoo-docker.conf</div>
     <div class="file-content">&lt;VirtualHost *:80&gt;
     ServerName miproyecto-erp.duckdns.org
 
-    # Logs
     ErrorLog ${APACHE_LOG_DIR}/odoo-error.log
     CustomLog ${APACHE_LOG_DIR}/odoo-access.log combined
 
-    # Proxy hacia Docker
+    # Enrutamiento Proxy Inverso hacia Docker
     ProxyPreserveHost On
     ProxyRequests Off
     ProxyPass / http://localhost:8069/
@@ -114,33 +136,49 @@ volumes:
     RequestHeader set "X-Forwarded-Proto" "https"
 &lt;/VirtualHost&gt;</div>
 
-    <h2>5. Automatización SSL (Certbot)</h2>
-    <p>Comando final para asegurar la conexión y generar certificados.</p>
+    <h2>5. Automatización SSL/TLS (Certbot & Let's Encrypt)</h2>
+    <p>
+        Para cifrar las comunicaciones de extremo a extremo y proteger las credenciales de acceso de los usuarios del ERP, ejecutamos Certbot. El cliente de Certbot modifica automáticamente el VirtualHost de Apache, instala los certificados X.509 firmados por Let's Encrypt y añade una regla de redirección forzosa de HTTP a HTTPS.
+    </p>
     
     <div class="terminal">
-        <span class="comment"># Generar certificado y configurar redirección HTTPS automática</span>
-        <span class="comment"># Importante: El dominio (-d) debe coincidir con tu ServerName</span>
+        <span class="comment"># 1. Habilitar la configuración en Apache</span>
+        <div class="cmd">sudo a2ensite odoo-docker.conf</div>
+
+        <span class="comment"># 2. Generar certificado SSL e inyectar redirección HTTPS obligatoria</span>
         <div class="cmd">sudo certbot --apache -d miproyecto-erp.duckdns.org</div>
         
-        <span class="comment"># Reiniciar Apache para aplicar cambios</span>
+        <span class="comment"># 3. Recargar el servidor web para aplicar los cambios de certificados</span>
         <div class="cmd">sudo systemctl reload apache2</div>
     </div>
 
-    <h2>6. Verificación Final</h2>
-    <ul>
-        <li>✅ <strong>Persistencia:</strong> Datos de BD seguros en volúmenes Docker.</li>
-        <li>✅ <strong>Alta Disponibilidad:</strong> <code>restart: always</code> configurado.</li>
-        <li>✅ <strong>Seguridad:</strong> HTTPS forzado y aislamiento de red.</li>
+    <h2>6. Verificación de Criterios de Calidad de Infraestructura</h2>
+    <p>
+        Al finalizar el despliegue, la infraestructura cumple con las garantías fundamentales de un entorno de producción moderno:
+    </p>
+    <ul class="space-y-2 text-sm text-slate-700">
+        <li>✅ <strong>Persistencia Garantizada:</strong> Los archivos de base de datos de PostgreSQL y los adjuntos de Odoo permanecen seguros en volúmenes Docker nombrados independientemente del ciclo de vida del contenedor.</li>
+        <li>✅ <strong>Alta Disponibilidad:</strong> La directiva <code>restart: always</code> asegura la recuperación automática ante caídas imprevistas del sistema o cortes de energía.</li>
+        <li>✅ <strong>Seguridad Perimetral:</strong> Puerto PostgreSQL aislado de internet, canal cifrado HTTPS forzoso con certificados válidos y cabeceras de proxy seguro.</li>
     </ul>
 
+    <div class="manual-bottom-actions">
+        <a href="../index.html" class="manual-back">← Volver a la portada</a>
+        <a href="#top" class="manual-top">↑ Volver arriba</a>
+    </div>
+
     <div class="footer">
-        Documentación Técnica - Generada para Portfolio Personal
+        Biblioteca técnica de <a href="https://aaronsgomez.es" target="_blank" rel="noopener">AaronSGomez</a> / <a href="https://github.com/AaronSGomez" target="_blank" rel="noopener">Github</a> &copy; 2026
     </div>
 
 </div>
 
+<div class="mobile-scroll-controls" aria-label="Controles de desplazamiento">
+    <a href="../index.html" title="Volver al índice">🏠</a>
+    <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" title="Volver arriba">↑</button>
+</div>
+
 <script>
-    // Inicializar Mermaid con tema claro/neutro para encajar con la guía
     mermaid.initialize({
         startOnLoad: true,
         theme: 'neutral',

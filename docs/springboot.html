@@ -1,335 +1,295 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arquitectura Spring Boot</title>
+    <title>Manual Técnico: Backend Spring Boot VeriFactu | Novapay</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/manuales.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/paginas.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .chart-container { 
-            position: relative; 
-            width: 100%; 
-            max-width: 600px; 
-            margin-left: auto; 
-            margin-right: auto; 
-            height: 300px; 
-            max-height: 400px; 
-        } 
-        @media (min-width: 768px) { 
-            .chart-container { height: 350px; } 
-        }
         .bureaucratic-shadow {
             box-shadow: 4px 4px 0px 0px #cbd5e1;
         }
-        .active-tab {
-          background-color: #334155; /* bg-slate-700 */
-          color: #ffffff; /* text-white */
-        }
-        .inactive-tab {
-            background-color: transparent;
-            color: #cbd5e1; /* text-slate-300 */
-        }
-        .inactive-tab:hover {
-            background-color: #037af127;
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
         }
         .step-card {
             transition: all 0.3s ease;
         }
         .step-card:hover {
-            transform: translateY(-5px);
-            border-color: #3b82f6;
-        }
-        .code-block {
-            background-color: #1e1e1e;
-            border-left: 4px solid #10b981;
+            transform: translateY(-4px);
+            border-color: #714b67;
         }
     </style>
 </head>
-<body id="top" class="manual-app manual-document antialiased text-slate-800 selection:bg-blue-500 selection:text-white">
+<body id="top" class="text-slate-800 bg-slate-100">
 
-    <header class="manual-header">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <span class="text-3xl">☕</span>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight">VeriFactu Backend Core</h1>
-                    <p class="text-xs text-blue-400 font-mono">Spring Boot 3.2 • Java 21 • Docker</p>
-                </div>
-            </div>
+<div class="document-page">
 
-        </div>
-    </header>
+    <!-- Top Action Bar (Back to index only) -->
+    <div class="manual-actions">
+        <a href="../index.html" class="manual-back">← Volver al índice</a>
+    </div>
 
-    <main class="manual-content max-w-7xl mx-auto px-4 py-8">
-        <div class="manual-actions">
-            <a href="../index.html" class="manual-back">← Volver al índice</a>
-            <a href="#top" class="manual-top">↑ Volver arriba</a>
-        </div>
-        <div class="mobile-scroll-controls" aria-label="Controles de desplazamiento">
-            <button type="button" onclick="window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })" aria-label="Bajar">↓</button>
-            <button type="button" onclick="window.scrollBy({ top: -window.innerHeight * 0.8, behavior: 'smooth' })" aria-label="Subir">↑</button>
-        </div>
+    <h1>Manual Técnico: Backend Intermedio Spring Boot para VeriFactu</h1>
+    <p>
+        <span class="badge">Java 21</span>
+        <span class="badge">Spring Boot 3.2</span>
+        <span class="badge">WSDL & JAXB</span>
+        <span class="badge">WS-Security</span>
+        <span class="badge">Docker Compose</span>
+    </p>
 
-        <div id="architecture" class="manual-section">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="bg-white p-6 rounded-lg border border-slate-200 bureaucratic-shadow">
-                        <h2 class="text-2xl font-bold text-slate-900 mb-4">El Concepto "Proxy Inteligente"</h2>
-                        <p class="text-slate-600 mb-6 leading-relaxed">
-                            Tu Backend actúa como un <strong>traductor diplomático</strong>. Tu App Flutter habla un idioma sencillo (JSON) y el Backend negocia con la burocracia estricta de la AEAT (SOAP/XML Firmado).
-                        </p>
-                        
-                        <div class="relative bg-slate-50 p-6 rounded-lg border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div class="text-center w-full md:w-1/4">
-                                <div class="w-16 h-16 bg-blue-500 rounded-full mx-auto flex items-center justify-center text-2xl mb-2 text-white shadow-md">📱</div>
-                                <h3 class="font-bold text-slate-800">Flutter App</h3>
-                                <p class="text-xs text-slate-500 mt-1">Envía JSON simple<br>(Factura DTO)</p>
-                            </div>
-
-                            <div class="hidden md:block text-slate-400 text-2xl">➔</div>
-
-                            <div class="text-center w-full md:w-1/3 bg-white p-4 rounded border border-green-500 shadow-sm">
-                                <div class="text-3xl mb-2">☕</div>
-                                <h3 class="font-bold text-green-600">Spring Boot</h3>
-                                <ul class="text-xs text-left text-slate-600 mt-2 space-y-1 ml-4 list-disc">
-                                    <li>Valida Datos</li>
-                                    <li>Genera XML (JaxB)</li>
-                                    <li>Firma (X.509)</li>
-                                    <li>Llamada SOAP</li>
-                                </ul>
-                            </div>
-
-                            <div class="hidden md:block text-slate-400 text-2xl">➔</div>
-
-                            <div class="text-center w-full md:w-1/4">
-                                <div class="w-16 h-16 bg-slate-200 rounded-full mx-auto flex items-center justify-center text-2xl mb-2 border-2 border-slate-400">🏛️</div>
-                                <h3 class="font-bold text-slate-800">AEAT</h3>
-                                <p class="text-xs text-slate-500 mt-1">Recibe SOAP Firmado<br>Valida huella</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="step-card bg-white p-5 rounded-lg border border-slate-200 bureaucratic-shadow">
-                            <h3 class="font-bold text-blue-800 mb-2">Seguridad (Spring Security)</h3>
-                            <p class="text-sm text-slate-600">
-                                La API que expones a Flutter debe estar protegida. Usa <strong>JWT</strong> o <strong>API Keys</strong>. Nadie debe poder invocar tu endpoint de "Enviar Factura" sin autorización.
-                            </p>
-                        </div>
-                        <div class="step-card bg-white p-5 rounded-lg border border-slate-200 bureaucratic-shadow">
-                            <h3 class="font-bold text-blue-800 mb-2">Resiliencia (Resilience4j)</h3>
-                            <p class="text-sm text-slate-600">
-                                ¿Si la AEAT está caída? Implementa un <strong>Circuit Breaker</strong>. Si falla, guarda la factura en tu BBDD con estado "Pendiente" y reintenta luego (Batch process).
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-lg border border-slate-200 h-fit bureaucratic-shadow">
-                    <h3 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-200 pb-2">Stack Tecnológico</h3>
-                    <ul class="space-y-4 text-sm">
-                        <li class="flex items-start gap-3">
-                            <span class="text-green-600 font-mono font-bold">Build</span>
-                            <div>
-                                <strong class="text-slate-800">Maven o Gradle</strong>
-                                <p class="text-slate-500 text-xs">Gradle es más rápido para builds incrementales en tu Ryzen.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-green-600 font-mono font-bold">SOAP</span>
-                            <div>
-                                <strong class="text-slate-800">Apache CXF / Spring-WS</strong>
-                                <p class="text-slate-500 text-xs">CXF es superior manejando WS-Security complex headers.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-green-600 font-mono font-bold">DB</span>
-                            <div>
-                                <strong class="text-slate-800">PostgreSQL</strong>
-                                <p class="text-slate-500 text-xs">La base de datos relacional robusta por excelencia.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-green-600 font-mono font-bold">Ops</span>
-                            <div>
-                                <strong class="text-slate-800">Docker Compose</strong>
-                                <p class="text-slate-500 text-xs">Levanta DB, App y Monitorización en 1 comando.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="scaffold" class="manual-section">
-            <div class="bg-white rounded-lg border border-slate-200 overflow-hidden bureaucratic-shadow">
-                <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-slate-900">Estructura de Carpetas Sugerida</h2>
-                    <span class="text-xs bg-blue-100 text-blue-800 border border-blue-200 px-2 py-1 rounded">Standard Spring Boot</span>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2">
-                    <div class="p-6 font-mono text-sm text-slate-700 border-r border-slate-200 bg-white">
-                        <ul class="space-y-2">
-                            <li class="text-blue-800 font-bold">src/main/java/com/tuempresa/verifactu</li>
-                            <li class="pl-4">├── <span class="text-amber-600">config</span> <span class="text-slate-400">// Beans de SOAP y Seguridad</span></li>
-                            <li class="pl-4">├── <span class="text-amber-600">controller</span> <span class="text-slate-400">// Recibe JSON de Flutter</span></li>
-                            <li class="pl-8 text-green-600">└── FacturaController.java</li>
-                            <li class="pl-4">├── <span class="text-amber-600">service</span> <span class="text-slate-400">// Lógica de Negocio</span></li>
-                            <li class="pl-8 text-green-600">└── VeriFactuService.java</li>
-                            <li class="pl-4">├── <span class="text-amber-600">model</span> <span class="text-slate-400">// Tus objetos internos</span></li>
-                            <li class="pl-4">├── <span class="text-purple-600">integration</span> <span class="text-slate-400">// Capa SOAP</span></li>
-                            <li class="pl-8">├── <span class="text-orange-600">aeat.generated</span> <span class="text-slate-400">// CLASES GENERADAS AUTO</span></li>
-                            <li class="pl-8">└── AeatSoapClient.java</li>
-                            <li class="pl-4">└── <span class="text-amber-600">utils</span> <span class="text-slate-400">// Firma Digital</span></li>
-                            <li class="pl-8 text-green-600">└── SignatureUtil.java</li>
-                            <li class="mt-4 text-blue-800 font-bold">src/main/resources</li>
-                            <li class="pl-4">├── application.yml</li>
-                            <li class="pl-4">├── certs/</li>
-                            <li class="pl-8 text-red-600">└── certificado_aeat.p12</li>
-                            <li class="pl-4">└── wsdl/</li>
-                            <li class="pl-8">└── SuministroFacturas.wsdl</li>
-                        </ul>
-                    </div>
-
-                    <div class="p-6 bg-slate-50">
-                        <h3 class="text-lg font-bold text-slate-900 mb-4">¿Qué va dónde?</h3>
-                        
-                        <div class="space-y-4">
-                            <div class="group cursor-pointer">
-                                <h4 class="font-bold text-orange-600">📂 aeat.generated</h4>
-                                <p class="text-sm text-slate-600 mt-1">
-                                    Aquí NO tocas código. Estas clases (miles de líneas) las crea Java automáticamente leyendo el WSDL de la AEAT. Definen la estructura exacta de la factura.
-                                </p>
-                            </div>
-
-                            <div class="group cursor-pointer">
-                                <h4 class="font-bold text-green-600">📄 AeatSoapClient.java</h4>
-                                <p class="text-sm text-slate-600 mt-1">
-                                    Aquí usas `WebServiceTemplate` (de Spring) o el cliente CXF. Cargas el objeto generado, inyectas el Header de seguridad y disparas.
-                                </p>
-                            </div>
-
-                            <div class="group cursor-pointer">
-                                <h4 class="font-bold text-red-600">🔑 certs/certificado.p12</h4>
-                                <p class="text-sm text-slate-600 mt-1">
-                                    Tu certificado digital. En Producción, esto <strong>NUNCA</strong> debe estar en el código fuente (Git). Se inyecta como un "Volume" de Docker o un "Secret" de Kubernetes.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="wsdl" class="manual-section">
-            <div class="bg-white p-8 rounded-lg border border-slate-200 text-center bureaucratic-shadow">
-                <h2 class="text-2xl font-bold text-slate-900 mb-6">Olvídate de Escribir XML</h2>
-                <p class="text-slate-600 max-w-2xl mx-auto mb-8">
-                    En Java, usamos plugins de Maven/Gradle para "compilar" la definición del servicio de Hacienda y convertirla en Clases Java.
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center justify-center">
-                    <div class="p-4 border border-slate-300 rounded bg-slate-50 shadow-sm">
-                        <div class="text-orange-600 font-mono text-sm mb-2 font-bold">Archivo Entrada</div>
-                        <div class="text-3xl mb-2">📄</div>
-                        <div class="font-bold text-slate-800">WSDL Aeat</div>
-                        <div class="text-xs text-slate-500">Definición XML compleja</div>
-                    </div>
-
-                    <div class="text-xl text-blue-600 font-bold animate-pulse">
-                        ➔ Plugin `cxf-codegen` ➔
-                    </div>
-
-                    <div class="p-4 border border-green-400 rounded bg-green-50 shadow-sm">
-                        <div class="text-green-700 font-mono text-sm mb-2 font-bold">Salida Java</div>
-                        <div class="text-3xl mb-2">☕</div>
-                        <div class="font-bold text-slate-800">Clases POJO</div>
-                        <div class="text-xs text-slate-500">`SuministroLRFacturas.java`</div>
-                    </div>
-                </div>
-
-                <div class="mt-10 text-left bg-slate-900 p-4 rounded-lg font-mono text-sm text-slate-300 overflow-x-auto shadow-inner">
-                    <p class="text-purple-400">// Ejemplo de uso en tu Servicio (Código Real)</p>
-                    <p class="mt-2"><span class="text-blue-300">SuministroLRFacturasEmitidas</span> peticion = <span class="text-yellow-300">new</span> SuministroLRFacturasEmitidas();</p>
-                    <p><span class="text-blue-300">CabeceraSuministro</span> cabecera = <span class="text-yellow-300">new</span> CabeceraSuministro();</p>
-                    <p>cabecera.setIDVersionSuministro(<span class="text-green-400">"1.0"</span>);</p>
-                    <p>peticion.setCabecera(cabecera);</p>
-                    <p class="mt-2 text-slate-500">// Spring convierte esto a XML, lo firma y lo envía.</p>
-                    <p>Object respuesta = webServiceTemplate.marshalSendAndReceive(peticion);</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="deployment" class="manual-section space-y-8">
+    <!-- SECTION 1: PROXY INTELIGENTE CONCEPT -->
+    <section class="my-6">
+        <div class="bg-white p-6 rounded-lg border border-slate-200 bureaucratic-shadow">
+            <h2 class="text-2xl font-bold text-slate-900 mt-0 mb-3">El Concepto "Proxy Inteligente"</h2>
+            <p class="text-slate-700 leading-relaxed text-sm mb-3">
+                El backend de Novapay opera bajo el patrón de diseño <strong>Facade (Fachada)</strong> o "Proxy Inteligente". Actúa como un intermediario o diplomático técnico entre la sencillez requerida por las aplicaciones cliente TPV (tablets o terminales con interfaz en Flutter que envían JSON simplificados) y la estricta complejidad formal exigida por la Agencia Tributaria.
+            </p>
+            <p class="text-slate-700 leading-relaxed text-sm mb-6">
+                Gracias a este diseño, las aplicaciones de cobro en el punto de venta no necesitan gestionar certificados digitales empresariales, lidiar con bibliotecas de criptografía nativa en Android o Windows, ni interpretar esquemas XML de miles de líneas. El servicio Spring Boot centraliza estas responsabilidades, garantizando el cumplimiento normativo sin afectar la velocidad de venta.
+            </p>
             
-            <div class="bg-white p-6 rounded-lg border border-slate-200 bureaucratic-shadow">
-                <h2 class="text-xl font-bold text-slate-900 mb-4">Estrategia de Despliegue (Docker)</h2>
-                <p class="text-slate-600 mb-4">
-                    Al dockerizar la aplicación, eliminas el problema de "funciona en mi local pero no en el servidor". Además, la migración a la nube (AWS/Azure) es trivial: solo subes el contenedor.
-                </p>
+            <div class="relative bg-slate-50 p-6 rounded-lg border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="text-center w-full md:w-1/4">
+                    <div class="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-2xl mb-2 text-white shadow-md">📱</div>
+                    <h3 class="font-bold text-slate-800 text-sm mt-0">Flutter App / TPV</h3>
+                    <p class="text-xs text-slate-500 mt-1 m-0">Envía JSON ligero con datos de venta<br>(Factura DTO)</p>
+                </div>
 
-                <div class="bg-slate-900 p-4 rounded text-xs font-mono text-slate-300 shadow-inner">
-                    <div class="text-slate-500 mb-2"># docker-compose.yml (Concepto)</div>
-                    <div class="pl-2">
-                        <span class="text-purple-400">services:</span><br>
-                        &nbsp;&nbsp;<span class="text-blue-400">verifactu-backend:</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;image: verifactu-api:latest<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;ports: <span class="text-green-400">"8080:8080"</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;volumes:<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ./certs:/app/certs <span class="text-slate-500"># Inyección segura de certificados</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;environment:<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- SPRING_PROFILES_ACTIVE=prod<br>
-                        <br>
-                        &nbsp;&nbsp;<span class="text-blue-400">postgres-db:</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;image: postgres:16<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;volumes:<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- pgdata:/var/lib/postgresql/data
+                <div class="hidden md:block text-slate-400 text-2xl font-bold">➔</div>
+
+                <div class="text-center w-full md:w-1/3 bg-white p-4 rounded-lg border-2 border-green-500 shadow-sm">
+                    <div class="text-3xl mb-1">☕</div>
+                    <h3 class="font-bold text-green-700 text-base mt-0 mb-1">Spring Boot Middleware</h3>
+                    <ul class="text-xs text-left text-slate-600 space-y-1 ml-4 list-disc m-0 leading-relaxed">
+                        <li>Valida integridad del DTO</li>
+                        <li>Calcula Hash SHA-256 encadenado</li>
+                        <li>Genera XML vía POJOs JAXB/CXF</li>
+                        <li>Firma X.509 con certificado .p12</li>
+                        <li>Transmite paquete SOAP WS-Security</li>
+                    </ul>
+                </div>
+
+                <div class="hidden md:block text-slate-400 text-2xl font-bold">➔</div>
+
+                <div class="text-center w-full md:w-1/4">
+                    <div class="w-16 h-16 bg-slate-200 rounded-full mx-auto flex items-center justify-center text-2xl mb-2 border-2 border-slate-400">🏛️</div>
+                    <h3 class="font-bold text-slate-800 text-sm mt-0">Servidores AEAT</h3>
+                    <p class="text-xs text-slate-500 mt-1 m-0">Recibe SOAP Firmado<br>Verifica huella y devuelve CSV</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+            <div class="step-card bg-white p-5 rounded-lg border border-slate-200 bureaucratic-shadow">
+                <h3 class="font-bold text-blue-900 text-base mt-0 mb-2">Seguridad de API (Spring Security)</h3>
+                <p class="text-xs text-slate-600 m-0 leading-relaxed">
+                    Los endpoints REST expuestos al punto de venta se protegen mediante tokens <strong>JWT (JSON Web Tokens)</strong> con caducidad corta o claves API Key por dispositivo registrado. Esto impide que terminales no autorizadas o actores maliciosos puedan invocar servicios de facturación a nombre de la empresa.
+                </p>
+            </div>
+            <div class="step-card bg-white p-5 rounded-lg border border-slate-200 bureaucratic-shadow">
+                <h3 class="font-bold text-blue-900 text-base mt-0 mb-2">Resiliencia (Resilience4j Circuit Breaker)</h3>
+                <p class="text-xs text-slate-600 m-0 leading-relaxed">
+                    Si la infraestructura de la Agencia Tributaria sufre degradación o caídas de red, la librería <strong>Resilience4j</strong> abre el circuito para evitar bloquear los hilos del servidor Java. La factura se asienta en la base de datos local y se delega la retransmisión al hilo asíncrono.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: TECH STACK & FOLDER SCAFFOLD -->
+    <section class="my-8">
+        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden bureaucratic-shadow">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-900 m-0">Estructura de Carpetas del Proyecto Java</h2>
+                <span class="text-xs bg-blue-100 text-blue-800 border border-blue-200 px-2 py-1 rounded mono font-semibold">Standard Spring Boot Layout</span>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <!-- Folder Tree -->
+                <div class="p-6 mono text-xs text-slate-700 border-b lg:border-b-0 lg:border-r border-slate-200 bg-white">
+                    <ul class="space-y-1.5 m-0 p-0 list-none">
+                        <li class="text-blue-800 font-bold">src/main/java/com/novapay/verifactu</li>
+                        <li class="pl-4">├── <span class="text-amber-600 font-bold">config/</span> <span class="text-slate-400">// Beans SOAP, WebServiceTemplate y Security</span></li>
+                        <li class="pl-4">├── <span class="text-amber-600 font-bold">controller/</span> <span class="text-slate-400">// Endpoints REST que reciben DTO desde Flutter</span></li>
+                        <li class="pl-8 text-green-700">└── FacturaController.java</li>
+                        <li class="pl-4">├── <span class="text-amber-600 font-bold">service/</span> <span class="text-slate-400">// Lógica de negocio y encadenamiento SHA-256</span></li>
+                        <li class="pl-8 text-green-700">└── VeriFactuService.java</li>
+                        <li class="pl-4">├── <span class="text-amber-600 font-bold">model/</span> <span class="text-slate-400">// Entidades JPA e InvoiceDTO de entrada</span></li>
+                        <li class="pl-4">├── <span class="text-purple-700 font-bold">integration/</span> <span class="text-slate-400">// Capa SOAP & CXF</span></li>
+                        <li class="pl-8">├── <span class="text-amber-700 font-bold">aeat.generated/</span> <span class="text-slate-400">// POJOS AUTO GENERADOS</span></li>
+                        <li class="pl-8">└── AeatSoapClient.java</li>
+                        <li class="pl-4">└── <span class="text-amber-600 font-bold">utils/</span> <span class="text-slate-400">// SHA-256 & Firma Digital X.509</span></li>
+                        <li class="pl-8 text-green-700">└── SignatureUtil.java</li>
+                        <li class="mt-3 text-blue-800 font-bold">src/main/resources</li>
+                        <li class="pl-4">├── application.yml</li>
+                        <li class="pl-4">├── certs/</li>
+                        <li class="pl-8 text-red-600 font-bold">└── certificado_aeat.p12</li>
+                        <li class="pl-4">└── wsdl/</li>
+                        <li class="pl-8">└── SuministroFacturas.wsdl</li>
+                    </ul>
+                </div>
+
+                <!-- Explanation Panel -->
+                <div class="p-6 bg-slate-50">
+                    <h3 class="text-lg font-bold text-slate-900 mt-0 mb-3">Justificación Arquitectónica de Carpetas</h3>
+                    
+                    <div class="space-y-4 text-xs text-slate-700">
+                        <div>
+                            <h4 class="font-bold text-amber-700 m-0 text-sm">📂 aeat.generated</h4>
+                            <p class="text-slate-600 mt-1 m-0 leading-relaxed">
+                                Aísla los miles de objetos Java autogenerados desde el WSDL de la AEAT. Al mantenerlos en su propio paquete separado, se evita contaminar las clases del dominio de negocio y se facilita la actualización futura del esquema tributario.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-green-700 m-0 text-sm">📄 AeatSoapClient.java</h4>
+                            <p class="text-slate-600 mt-1 m-0 leading-relaxed">
+                                Implementa la comunicación remota utilizando `WebServiceTemplate` de Spring WS. Inyecta el interceptor `Wss4jSecurityInterceptor` encargado de añadir el encabezado WS-Security firmado antes de la transmisión.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-red-600 m-0 text-sm">🔑 certs/certificado.p12</h4>
+                            <p class="text-slate-600 mt-1 m-0 leading-relaxed">
+                                Certificado digital en formato PKCS#12 (.p12). Contiene la clave privada RSA legal de la empresa. Por seguridad, este archivo se ignora en <code>.gitignore</code> y se monta dinámicamente mediante volúmenes en producción.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-lg border border-slate-200 bureaucratic-shadow">
-                    <h3 class="text-lg font-bold text-amber-600 mb-2">Plan de Mantenimiento</h3>
-                    <ul class="space-y-3 text-sm text-slate-600 mt-4">
-                        <li class="flex items-start gap-2">
-                            <span class="text-green-600 font-bold mt-0.5">✓</span>
-                            <span><strong>Logs Centralizados:</strong> Usa Logback configurado para rotar ficheros diariamente. Si algo falla, el log te dirá exactamente por qué la AEAT rechazó el envío.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="text-green-600 font-bold mt-0.5">✓</span>
-                            <span><strong>Actualización Certificados:</strong> Los certificados caducan. Crea una alerta en tu calendario 1 mes antes. En Docker, solo cambias el archivo en la carpeta `certs` y reinicias.</span>
-                        </li>
-                    </ul>
+    <!-- SECTION 3: WSDL AUTO GENERATION -->
+    <section class="my-8">
+        <div class="bg-white p-6 rounded-lg border border-slate-200 text-center bureaucratic-shadow">
+            <h2 class="text-2xl font-bold text-slate-900 mt-0 mb-2">Automatización de Clases Java desde WSDL</h2>
+            <p class="text-slate-700 max-w-3xl mx-auto mb-4 text-sm leading-relaxed">
+                Una de las ventajas fundamentales de utilizar Java en el backend es la existencia de herramientas de compilación como <code>cxf-codegen-plugin</code> o <code>jaxb2-maven-plugin</code>. Estos plugins leen directamente los archivos de definición WSDL oficiales proporcionados por la AEAT y los compilan a clases Java POJO fuertemente tipadas durante la fase <code>./mvnw compile</code>.
+            </p>
+            <p class="text-slate-600 max-w-3xl mx-auto mb-6 text-xs leading-relaxed">
+                Esto elimina por completo la necesidad de concatenar cadenas XML manualmente, previniendo errores de sintaxis en etiquetas o atributos y permitiendo autocompletado y validación de tipos en tiempo de compilación.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center justify-center my-6">
+                <div class="p-4 border border-slate-300 rounded-lg bg-slate-50 shadow-sm">
+                    <div class="text-amber-700 mono text-xs mb-1 font-bold">Entrada (Definición Oficial)</div>
+                    <div class="text-3xl mb-1">📄</div>
+                    <div class="font-bold text-slate-800 text-sm">SuministroFacturas.wsdl</div>
+                    <div class="text-xs text-slate-500">Esquema XML Complejo de AEAT</div>
                 </div>
 
-                <div class="bg-white p-6 rounded-lg border border-slate-200 bureaucratic-shadow">
-                    <h3 class="text-lg font-bold text-red-600 mb-2">Recuperación de Desastres</h3>
-                    <ul class="space-y-3 text-sm text-slate-600 mt-4">
-                        <li class="flex items-start gap-2">
-                            <span class="text-red-500 font-bold mt-0.5">⚠</span>
-                            <span><strong>Cola de Reintentos:</strong> Si la AEAT devuelve error 500, no pierdas la factura. Guárdala con estado `PENDIENTE_REENVIO` y ten un `@Scheduled` en Spring que reintente cada 10 mins.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="text-red-500 font-bold mt-0.5">⚠</span>
-                            <span><strong>Backups DB:</strong> Configura un dump automático de PostgreSQL cada noche. Es tu única fuente de verdad.</span>
-                        </li>
-                    </ul>
+                <div class="text-base text-blue-700 font-bold animate-pulse">
+                    ➔ Compilación `cxf-codegen` ➔
+                </div>
+
+                <div class="p-4 border border-green-400 rounded-lg bg-green-50 shadow-sm">
+                    <div class="text-green-800 mono text-xs mb-1 font-bold">Salida (Código Fuertemente Tipado)</div>
+                    <div class="text-3xl mb-1">☕</div>
+                    <div class="font-bold text-slate-800 text-sm">POJOs Java Generados</div>
+                    <div class="text-xs text-slate-500">`SuministroLRFacturasEmitidas.java`</div>
+                </div>
+            </div>
+
+            <div class="mt-6 text-left bg-slate-900 p-4 rounded-lg mono text-xs text-slate-200 overflow-x-auto shadow-inner">
+                <p class="text-purple-400 m-0">// Uso real de clases autogeneradas en VeriFactuService.java</p>
+                <p class="mt-2 m-0"><span class="text-blue-300">SuministroLRFacturasEmitidas</span> peticion = <span class="text-amber-300">new</span> SuministroLRFacturasEmitidas();</p>
+                <p class="m-0"><span class="text-blue-300">CabeceraSuministro</span> cabecera = <span class="text-amber-300">new</span> CabeceraSuministro();</p>
+                <p class="m-0">cabecera.setIDVersionSuministro(<span class="text-green-400">"1.0"</span>);</p>
+                <p class="m-0">cabecera.setTitular(<span class="text-amber-300">new</span> PersonaFisicaJuridicaESType(<span class="text-green-400">"B12345678"</span>, <span class="text-green-400">"Novapay S.L."</span>));</p>
+                <p class="m-0">peticion.setCabecera(cabecera);</p>
+                <p class="mt-2 text-slate-500 m-0">// Spring WS transforma la instancia POJO a XML, inyecta WS-Security X.509 y ejecuta la llamada HTTPS</p>
+                <p class="m-0">Object respuesta = webServiceTemplate.marshalSendAndReceive(peticion);</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: DEPLOYMENT & RECOVERY -->
+    <section class="my-8 space-y-6">
+        <div class="bg-white p-6 rounded-lg border border-slate-200 bureaucratic-shadow">
+            <h2 class="text-xl font-bold text-slate-900 mt-0 mb-3">Estrategia de Despliegue en Contenedores (Docker)</h2>
+            <p class="text-slate-700 mb-4 text-sm leading-relaxed">
+                Al empaquetar la aplicación en un contenedor estandarizado, se garantiza que el comportamiento de la pila de librerías criptográficas de Java 21 sea exactamente idéntico en el entorno de desarrollo local, en la Raspberry Pi 5 de pruebas y en el servidor de producción.
+            </p>
+
+            <div class="bg-slate-900 p-4 rounded-lg text-xs mono text-slate-200 shadow-inner overflow-x-auto">
+                <div class="text-slate-500 mb-2"># docker-compose.yml (Stack de Producción)</div>
+                <div class="pl-2">
+                    <span class="text-purple-400">services:</span><br>
+                    &nbsp;&nbsp;<span class="text-blue-400">verifactu-backend:</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;image: novapay-backend:latest<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;ports: <span class="text-green-400">"127.0.0.1:8080:8080"</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;volumes:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ./certs:/app/certs:ro <span class="text-slate-500"># Lectura segura del certificado digital</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;environment:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- SPRING_PROFILES_ACTIVE=prod<br>
+                    <br>
+                    &nbsp;&nbsp;<span class="text-blue-400">postgres-db:</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;image: postgres:16-alpine<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;volumes:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- pgdata:/var/lib/postgresql/data
                 </div>
             </div>
         </div>
 
-        <div class="manual-bottom-actions">
-            <a href="../index.html" class="manual-back">← Volver al índice</a>
-            <a href="#top" class="manual-top">↑ Volver arriba</a>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-lg border border-slate-200 bureaucratic-shadow">
+                <h3 class="text-base font-bold text-amber-700 mt-0 mb-2">Plan de Mantenimiento Operativo</h3>
+                <ul class="space-y-3 text-xs text-slate-600 mt-3 p-0 list-none leading-relaxed">
+                    <li class="flex items-start gap-2">
+                        <span class="text-green-600 font-bold mt-0.5">✓</span>
+                        <span><strong>Logs Centralizados:</strong> Rotación diaria mediante Logback. Si la AEAT rechaza un paquete, se almacena el XML completo devuelto para auditoría rápida.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-green-600 font-bold mt-0.5">✓</span>
+                        <span><strong>Renovación de Certificados:</strong> Los certificados expirados paralizan la facturación. Al estar montados vía volumen, basta sustituir el archivo <code>.p12</code> en el host y reiniciar el contenedor.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg border border-slate-200 bureaucratic-shadow">
+                <h3 class="text-base font-bold text-red-700 mt-0 mb-2">Plan de Recuperación de Desastres</h3>
+                <ul class="space-y-3 text-xs text-slate-600 mt-3 p-0 list-none leading-relaxed">
+                    <li class="flex items-start gap-2">
+                        <span class="text-red-600 font-bold mt-0.5">⚠</span>
+                        <span><strong>Cola de Reintentos `@Scheduled`:</strong> Ante caídas prolongadas de la Agencia Tributaria, las facturas en estado <code>PENDING</code> se reintentan en segundo plano de forma automática.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-red-600 font-bold mt-0.5">⚠</span>
+                        <span><strong>Backups Automáticos PostgreSQL:</strong> Copias de seguridad diarias via <code>pg_dump</code>. La base de datos relacional es la única fuente de verdad inalterable del negocio.</span>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </main>
+    </section>
+
+    <!-- Bottom Actions & Shared Footer -->
+    <div class="manual-bottom-actions">
+        <a href="../index.html" class="manual-back">← Volver a la portada</a>
+        <a href="#top" class="manual-top">↑ Volver arriba</a>
+    </div>
+
+    <div class="footer">
+        Biblioteca técnica de <a href="https://aaronsgomez.es" target="_blank" rel="noopener">AaronSGomez</a> / <a href="https://github.com/AaronSGomez" target="_blank" rel="noopener">Github</a> &copy; 2026
+    </div>
+
+</div>
+
+<!-- Mobile Floating Controls -->
+<div class="mobile-scroll-controls" aria-label="Controles de desplazamiento">
+    <a href="../index.html" title="Volver a la portada">🏠</a>
+    <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" title="Volver arriba">↑</button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { curve: 'basis' } });
+    });
+</script>
 
 </body>
 </html>

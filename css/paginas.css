@@ -13,12 +13,13 @@
         }
 
         .document-page {
-          max-width: 850px;
-          margin: 0 auto;
+          max-width: 1140px;
+          width: 95%;
+          margin: 25px auto;
           background-color: white;
-          padding: 50px;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-          border-radius: 8px;
+          padding: 45px 55px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          border-radius: 12px;
         }
 
         h1 {
@@ -145,9 +146,148 @@
           margin-top: 50px;
           padding-top: 20px;
           border-top: 1px solid #eee;
-          font-size: 0.8em;
-          color: #888;
+          font-size: 0.88em;
+          color: #666;
           text-align: center;
+        }
+
+        .footer p {
+          margin: 6px 0;
+        }
+
+        .footer a {
+          color: #714b67;
+          text-decoration: none;
+          font-weight: 600;
+        }
+
+        .footer a:hover {
+          text-decoration: underline;
+        }
+
+        /* Advertencias y Alertas */
+        .warning {
+          background-color: #fff3e0;
+          border-left: 4px solid #ff9800;
+          padding: 15px;
+          margin: 15px 0;
+          border-radius: 0 4px 4px 0;
+          color: #e65100;
+        }
+
+        /* Botones de Navegación */
+        .manual-actions {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 24px;
+        }
+
+        .manual-bottom-actions {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+        }
+
+        .manual-back,
+        .manual-top {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 9px 18px;
+          border: 1px solid #714b67;
+          border-radius: 8px;
+          color: #714b67;
+          background: #fdfbfd;
+          font-size: 0.92rem;
+          font-weight: 600;
+          text-decoration: none;
+          box-shadow: 0 2px 6px rgba(113, 75, 103, 0.08);
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+        }
+
+        .manual-back:hover,
+        .manual-top:hover {
+          color: #ffffff;
+          background: #714b67;
+          box-shadow: 0 4px 12px rgba(113, 75, 103, 0.28);
+          transform: translateY(-1px);
+        }
+
+        /* Controles Flotantes para Móviles */
+        .mobile-scroll-controls {
+          position: fixed;
+          right: 18px;
+          bottom: 20px;
+          z-index: 99;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .mobile-scroll-controls button,
+        .mobile-scroll-controls a {
+          width: 42px;
+          height: 42px;
+          padding: 0;
+          border: 1px solid rgba(113, 75, 103, 0.4);
+          border-radius: 50%;
+          color: #714b67;
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+          font-size: 1.1rem;
+          cursor: pointer;
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .mobile-scroll-controls button:hover,
+        .mobile-scroll-controls a:hover {
+          transform: scale(1.08);
+          background: #714b67;
+          color: #ffffff;
+        }
+
+        /* Tablas Técnicas Limpias */
+        .tech-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 20px 0;
+          font-size: 0.95rem;
+        }
+
+        .tech-table th {
+          background-color: #f4edf2;
+          color: #714b67;
+          text-align: left;
+          padding: 12px 15px;
+          border-bottom: 2px solid #714b67;
+          font-weight: 700;
+        }
+
+        .tech-table td {
+          padding: 12px 15px;
+          border-bottom: 1px solid #eee;
+        }
+
+        .tech-table tr:hover {
+          background-color: #fafafa;
+        }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+          .document-page {
+            padding: 24px 18px;
+          }
         }
 
         /* Ajuste para Mermaid en fondo claro */

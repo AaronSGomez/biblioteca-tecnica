@@ -3,23 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Portfolio técnico de documentación, arquitectura y despliegue alrededor de Raspberry Pi, Docker y APIs.">
+    <meta name="description" content="Biblioteca de documentos técnicos útiles para programación de servidores caseros, Raspberry Pi, Docker y APIs.">
     <title>Biblioteca técnica | PI5SERVER</title>
     <link rel="stylesheet" href="css/style.css?v=293b288">
-    <style>
-    </style>
 </head>
 <body>
     <header>
         <div class="header-content">
-            <p class="header-kicker">PI5SERVER · PORTFOLIO TÉCNICO</p>
+            <p class="header-kicker">PI5SERVER · BIBLIOTECA TÉCNICA</p>
             <h1>
                 <span class="header-title">Biblioteca Técnica</span>
                 <span class="header-brand">PI5SERVER</span>
             </h1>
             <p class="header-subtitle">
-                <span>Documentación, arquitectura y trabajos realizados</span>
-                <span>con Raspberry Pi, Docker y APIs.</span>
+                <span>Documentos técnicos útiles para la programación</span>
+                <span>y despliegue de servidores caseros con Raspberry Pi y Docker.</span>
             </p>
         </div>
     </header>
@@ -29,12 +27,12 @@
             <div class="portfolio-content">
                 <div class="portfolio-heading">
                     <span class="portfolio-eyebrow">CONTEXTO DEL PROYECTO</span>
-                    <h2>Sobre este portfolio</h2>
+                    <h2>Sobre esta biblioteca técnica</h2>
                 </div>
                 <div class="portfolio-description">
                     <p>
-                        Colección de guías, decisiones de arquitectura y páginas interactivas
-                        creadas durante la experimentación con Raspberry Pi, Docker, proxies
+                        Colección de guías, decisiones de arquitectura y documentos técnicos útiles
+                        creados durante la experimentación y programación de servidores caseros con Raspberry Pi, Docker, proxies
                         inversos, seguridad perimetral, Spring Boot y VeriFactu.
                     </p>
                     <p class="portfolio-notice">
@@ -46,66 +44,114 @@
             </div>
         </section>
 
-        <a href="docs/verifactu.html" class="app-card card-docs">
+        <a href="docs/verifactu.html" class="app-card card-verifactu">
             <div>
-                <div class="app-title">VeriFactu INFO</div>
-                <div class="app-desc">Guía interactiva sobre SOAP, XML, firma digital y librerías Dart.</div>
+                <div class="card-header-wrapper">
+                    <span class="card-icon">🏛️</span>
+                    <h3 class="app-title">VeriFactu INFO</h3>
+                </div>
+                <div class="app-desc">Guía interactiva sobre SOAP, XML, firma digital X.509, encadenamiento de facturas y librerías Dart.</div>
             </div>
-            <div class="tech-tags"><span class="tag">VeriFactu</span><span class="tag">Flutter</span></div>
+            <div class="tech-tags">
+                <span class="tag tag-cat">Normativa & Cliente</span>
+                <span class="tag tag-tech">Dart / Flutter</span>
+                <span class="tag tag-tech">SOAP XML</span>
+            </div>
         </a>
 
-        <a href="docs/springbootAPI.html" class="app-card card-docs">
+        <a href="docs/springbootAPI.html" class="app-card card-api">
             <div>
-                <div class="app-title">Informe Backend</div>
-                <div class="app-desc">Arquitectura, flujo fiscal, resiliencia y despliegue del backend.</div>
+                <div class="card-header-wrapper">
+                    <span class="card-icon">⚙️</span>
+                    <h3 class="app-title">Informe Backend NovaPay</h3>
+                </div>
+                <div class="app-desc">Arquitectura REST, enrutamiento fiscal regional, resiliencia con Exponential Backoff y persistencia SQL.</div>
             </div>
-            <div class="tech-tags"><span class="tag">Spring Boot</span><span class="tag">API</span></div>
+            <div class="tech-tags">
+                <span class="tag tag-cat">Arquitectura Core REST</span>
+                <span class="tag tag-tech">Spring Boot</span>
+                <span class="tag tag-tech">SQL</span>
+            </div>
         </a>
 
-        <a href="docs/springboot.html" class="app-card card-docs">
+        <a href="docs/springboot.html" class="app-card card-java">
             <div>
-                <div class="app-title">Arquitectura Spring Boot</div>
-                <div class="app-desc">Diseño del backend intermedio para traducir JSON a SOAP/XML firmado.</div>
+                <div class="card-header-wrapper">
+                    <span class="card-icon">☕</span>
+                    <h3 class="app-title">Arquitectura Spring Boot</h3>
+                </div>
+                <div class="app-desc">Diseño del backend intermedio para traducir peticiones JSON a sobres SOAP/XML firmados digitalmente.</div>
             </div>
-            <div class="tech-tags"><span class="tag">Java</span><span class="tag">Docker</span></div>
+            <div class="tech-tags">
+                <span class="tag tag-cat">Middleware & SOAP</span>
+                <span class="tag tag-tech">Java 17</span>
+                <span class="tag tag-tech">WSDL/POJO</span>
+            </div>
         </a>
 
-        <a href="docs/dokerizacion.html" class="app-card card-docs">
+        <a href="docs/dokerizacion.html" class="app-card card-odoo">
             <div>
-                <div class="app-title">Odoo Dockerizado</div>
-                <div class="app-desc">Persistencia, PostgreSQL, Apache Reverse Proxy y SSL/TLS.</div>
+                <div class="card-header-wrapper">
+                    <span class="card-icon">📦</span>
+                    <h3 class="app-title">Odoo Dockerizado</h3>
+                </div>
+                <div class="app-desc">Persistencia de datos en volúmenes Docker, PostgreSQL, Apache Reverse Proxy y certificados SSL/TLS.</div>
             </div>
-            <div class="tech-tags"><span class="tag">Odoo</span><span class="tag">Docker Compose</span></div>
+            <div class="tech-tags">
+                <span class="tag tag-cat">ERP & Contenedores</span>
+                <span class="tag tag-tech">Odoo 16</span>
+                <span class="tag tag-tech">PostgreSQL</span>
+            </div>
         </a>
 
-        <a href="docs/duckdnsyssl.html" class="app-card card-docs">
+        <a href="docs/duckdnsyssl.html" class="app-card card-ssl">
             <div>
-                <div class="app-title">Multi-dominio y SSL</div>
-                <div class="app-desc">DuckDNS, actualización de IP, VirtualHosts y Let's Encrypt.</div>
+                <div class="card-header-wrapper">
+                    <span class="card-icon">🌐</span>
+                    <h3 class="app-title">Multi-dominio y SSL</h3>
+                </div>
+                <div class="app-desc">DDNS con DuckDNS, scripts de actualización de IP, VirtualHosts en Apache y automatización Certbot.</div>
             </div>
-            <div class="tech-tags"><span class="tag">DuckDNS</span><span class="tag">Apache</span></div>
+            <div class="tech-tags">
+                <span class="tag tag-cat">Infraestructura & DNS</span>
+                <span class="tag tag-tech">DuckDNS</span>
+                <span class="tag tag-tech">Certbot TLS</span>
+            </div>
         </a>
 
-        <a href="docs/nginx.html" class="app-card card-docs">
+        <a href="docs/nginx.html" class="app-card card-nginx">
             <div>
-                <div class="app-title">Búnker Nginx</div>
-                <div class="app-desc">Aislamiento de backend, rate limiting, timeouts y trazabilidad.</div>
+                <div class="card-header-wrapper">
+                    <span class="card-icon">🛡️</span>
+                    <h3 class="app-title">Búnker Nginx</h3>
+                </div>
+                <div class="app-desc">Aislamiento de microservicios, Rate Limiting, ajuste fino de timeouts y política Zero Trust.</div>
             </div>
-            <div class="tech-tags"><span class="tag">Nginx</span><span class="tag">Seguridad</span></div>
+            <div class="tech-tags">
+                <span class="tag tag-cat">Proxy Inverso & Zero Trust</span>
+                <span class="tag tag-tech">Rate Limiting</span>
+                <span class="tag tag-tech">HSTS</span>
+            </div>
         </a>
 
-        <a href="docs/securefirewall.html" class="app-card card-docs">
+        <a href="docs/securefirewall.html" class="app-card card-security">
             <div>
-                <div class="app-title">CrowdSec y Firewall Bouncer</div>
-                <div class="app-desc">Detección de amenazas y bloqueo a nivel de red.</div>
+                <div class="card-header-wrapper">
+                    <span class="card-icon">🔒</span>
+                    <h3 class="app-title">CrowdSec y Firewall Bouncer</h3>
+                </div>
+                <div class="app-desc">Detección de comportamientos maliciosos, inteligencia de amenazas compartida y bloqueo con iptables.</div>
             </div>
-            <div class="tech-tags"><span class="tag">CrowdSec</span><span class="tag">Firewall</span></div>
+            <div class="tech-tags">
+                <span class="tag tag-cat">Defensa Perimetral</span>
+                <span class="tag tag-tech">CrowdSec LAPI</span>
+                <span class="tag tag-tech">iptables</span>
+            </div>
         </a>
     </main>
 
     <footer>
-        <p>Portfolio técnico de <strong>AaronSGomez</strong> &copy; 2026</p>
-        <p>Documentación estática preparada para GitHub Pages</p>
+        Biblioteca técnica de <a href="https://aaronsgomez.es" target="_blank" rel="noopener">AaronSGomez</a> / <a href="https://github.com/AaronSGomez" target="_blank" rel="noopener">Github</a> &copy; 2026
     </footer>
 </body>
 </html>

@@ -1,30 +1,48 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrowdSec & Firewall Bouncer</title>
+    <title>Defensa Perimetral | CrowdSec & Firewall Bouncer</title>
     <link rel="stylesheet" href="../css/paginas.css">
 </head>
-<body>
+<body id="top">
 
 <div class="document-page">
 
-    <h1><span class="badge">Seguridad</span> Instalación de CrowdSec y Firewall Bouncer</h1>
+    <div class="manual-actions">
+        <a href="../index.html" class="manual-back">← Volver al índice</a>
+    </div>
+
+    <h1>Guía Paso a Paso: Defensa Perimetral con CrowdSec y Firewall Bouncer</h1>
+    <p>
+        <span class="badge">CrowdSec</span>
+        <span class="badge">Firewall Bouncer</span>
+        <span class="badge">Netfilter / NFTables</span>
+        <span class="badge">Ciberseguridad Híbrida</span>
+    </p>
     
-    <p>Esta guía detalla los pasos para implementar una arquitectura de seguridad híbrida: el motor de detección de CrowdSec funcionando como contenedor Docker para auditar los logs de Nginx, y el Bouncer operando de forma nativa en el sistema operativo para bloquear amenazas a nivel de red (Firewall).</p>
+    <div class="note">
+        <strong>Objetivo de esta guía:</strong> Implementar una arquitectura de ciberseguridad híbrida de detección y respuesta automatizada ante amenazas. El motor de análisis de comportamiento de <strong>CrowdSec</strong> opera como contenedor Docker auditando los logs de Nginx, mientras que el agente de remediación (<strong>Firewall Bouncer</strong>) se ejecuta de forma nativa en el sistema operativo host para bloquear IPs atacantes a nivel de kernel (Firewall de Red).
+    </div>
 
-    <h2>1. Configuración del Módulo en Docker</h2>
-    <p>El primer paso es añadir el motor de CrowdSec a nuestra infraestructura Docker y etiquetar el contenedor de Nginx para que sea auditado automáticamente.</p>
+    <h2>1. Arquitectura Híbrida de Detección y Remediación</h2>
+    <p>
+        Los cortafuegos tradicionales basados en reglas estáticas son insuficientes para detener ataques modernos dinámicos. <strong>CrowdSec</strong> es un sistema de prevención de intromisiones (IPS) colaborativo y de código abierto que procesa los logs de aplicaciones web en tiempo real para detectar comportamientos sospechosos (escaneos de vulnerabilidades CVE, ataques de fuerza bruta o inyecciones SQL).
+    </p>
+    <p>
+        Para mantener un rendimiento óptimo, desacoplamos la <strong>Detección</strong> (motor CrowdSec dentro de Docker) de la <strong>Remediación</strong> (Bouncer nativo en Linux). Cuando el motor en Docker detecta un comportamiento hostil, notifica al Bouncer del host, el cual descarta los paquetes TCP directamente en las tablas del kernel (<code>nftables</code> / <code>iptables</code>) antes de que la petición consuma recursos en el servidor web.
+    </p>
 
-    <h3>Modificaciones en <code>docker-compose.yml</code></h3>
-    <p>Añade las etiquetas a tu servicio web existente e incorpora el servicio de CrowdSec. Solo se muestra el código relevante a modificar:</p>
+    <h2>2. Configuración del Motor en Docker (Docker Compose)</h2>
+    <p>
+        Añadimos el servicio de CrowdSec a nuestra infraestructura contenedorizada y etiquetamos el servicio web de Nginx. Las etiquetas instruyen al agente de CrowdSec para auto-descubrir el contenedor y parsear sus logs de acceso mediante la colección de reglas <code>crowdsecurity/nginx</code> y <code>crowdsecurity/http-cve</code>.
+    </p>
 
-    <div class="file-header">docker-compose.yml (Fragmento de Seguridad)</div>
-<pre class="file-content">
-services:
+    <div class="file-header">📄 docker-compose.yml (Fragmento del Servicio CrowdSec)</div>
+    <div class="file-content">services:
   nginx:
-    # ... (tu configuración existente de nginx) ...
+    # ... (Configuración existente de Nginx) ...
     labels:
       - "crowdsec.enable=true"
       - "crowdsec.type=nginx"
@@ -36,7 +54,7 @@ services:
       - COLLECTIONS=crowdsecurity/nginx crowdsecurity/http-cve
       - DOCKER_HOST=unix:///var/run/docker.sock
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8080:8080" # Expone la API Local (LAPI) exclusivamente al bucle local
     volumes:
       - crowdsec-db:/var/lib/crowdsec/data/
       - crowdsec-config:/etc/crowdsec/
@@ -44,70 +62,90 @@ services:
     restart: always
 
 volumes:
-  # ... (tus volúmenes existentes) ...
   crowdsec-db:
-  crowdsec-config:
-</pre>
+  crowdsec-config:</div>
 
-    <p>Levanta la nueva configuración para aplicar los cambios y generar el motor de seguridad:</p>
+    <p>Desplegamos la nueva configuración para que Docker inicialice el motor de análisis de seguridad:</p>
 
     <div class="terminal">
-        <span class="comment"># Recrear contenedores en segundo plano</span><br>
+        <span class="comment"># Recrear los contenedores e iniciar el agente de CrowdSec</span><br>
         <span class="cmd">docker compose up -d</span>
     </div>
 
-    <h2>2. Generación de API Key para el Bouncer</h2>
-    <p>El Bouncer (host) necesita permisos para consultar la lista negra del motor (Docker). Generaremos una clave única desde el contenedor:</p>
+    <h2>3. Generación de Credenciales de API (LAPI Key)</h2>
+    <p>
+        El motor de CrowdSec expone un API Local (LAPI). El Bouncer nativo instalado en el sistema operativo necesita autenticarse frente a este API para consultar periódicamente la lista de direcciones IP bloqueadas (*decisions*). Registramos un nuevo bouncer en el motor ejecutable de Docker:
+    </p>
 
     <div class="terminal">
-        <span class="comment"># Crear identificador para el bouncer del firewall</span><br>
+        <span class="comment"># Registrar el identificador del bouncer y obtener la clave de API</span><br>
         <span class="cmd">docker exec -t crowdsec cscli bouncers add portero-firewall</span>
     </div>
 
     <div class="note">
-        <strong>Importante:</strong> Guarda la clave alfanumérica que te devuelve este comando. No se volverá a mostrar y la necesitarás en el Paso 4.
+        <strong>Clave de Autenticación:</strong> Copie la clave alfanumérica generada por el comando <code>cscli</code>. Esta credencial permite autorizar al demonio del sistema operativo para aplicar bloqueos de red.
     </div>
 
-    <h2>3. Instalación del Bouncer en el Host</h2>
-    <p>Saliendo de Docker, instalaremos el paquete nativo que gestionará las reglas de red (iptables/nftables) de la máquina host.</p>
+    <h2>4. Instalación del Firewall Bouncer Nativo en el Host</h2>
+    <p>
+        Instalamos el paquete nativo <code>crowdsec-firewall-bouncer</code> en el sistema operativo Linux (Debian/Ubuntu/Raspberry Pi OS). Ejecutarse fuera de Docker es esencial para que el Bouncer pueda manipular las reglas de filtrado de paquetes de la pila de red del Kernel Linux (Netfilter/NFTables).
+    </p>
 
     <div class="terminal">
-        <span class="comment"># Añadir el repositorio oficial de CrowdSec</span><br>
+        <span class="comment"># 1. Registrar el repositorio oficial de paquetes de CrowdSec</span><br>
         <span class="cmd">curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.deb.sh | sudo bash</span><br><br>
-        <span class="comment"># Instalar el paquete de integración con el firewall</span><br>
-        <span class="cmd">sudo apt install -y crowdsec-firewall-bouncer</span>
+        <span class="comment"># 2. Instalar el paquete ejecutable del Bouncer de Firewall</span><br>
+        <span class="cmd">sudo apt install -y crowdsec-firewall-bouncer-nftables</span>
     </div>
 
-    <h2>4. Vinculación y Puesta en Marcha</h2>
-    <p>Editaremos la configuración del Bouncer recién instalado para inyectar la clave generada en el paso 2 y apuntar al motor local de Docker.</p>
+    <h2>5. Vinculación y Activación del Servicio Systemd</h2>
+    <p>
+        Editamos el fichero de configuración del Bouncer en el sistema operativo host para apuntar hacia el API Local expuesto por el contenedor Docker en <code>http://127.0.0.1:8080/</code> e inyectar la clave API generada.
+    </p>
 
     <div class="terminal">
-        <span class="comment"># Editar el archivo de configuración nativo</span><br>
+        <span class="comment"># Editar el fichero de configuración del Bouncer nativo</span><br>
         <span class="cmd">sudo nano /etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml</span>
     </div>
 
-    <p>Busca los siguientes parámetros y reemplaza los valores de forma estática (sin utilizar sintaxis de variables de entorno):</p>
+    <div class="file-header">📄 /etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml</div>
+    <div class="file-content">api_url: http://127.0.0.1:8080/
+api_key: PEGA_AQUI_TU_CLAVE_GENERADA</div>
 
-    <div class="file-header">/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml</div>
-<pre class="file-content">
-api_url: http://127.0.0.1:8080/
-api_key: PEGA_TU_CLAVE_AQUI
-</pre>
-
-    <p>Finalmente, habilita el servicio para que inicie con el sistema y reinícialo para aplicar los cambios:</p>
+    <p>Habilitamos el demonio para que se ejecute automáticamente al arrancar el sistema operativo y reiniciamos el servicio:</p>
 
     <div class="terminal">
-        <span class="comment"># Aplicar nueva configuración y arranque automático</span><br>
+        <span class="comment"># Aplicar configuración, arrancar y verificar el estado del demonio</span><br>
         <span class="cmd">sudo systemctl restart crowdsec-firewall-bouncer</span><br>
         <span class="cmd">sudo systemctl enable crowdsec-firewall-bouncer</span><br><br>
-        <span class="comment"># Comprobar el estado del servicio</span><br>
+        <span class="comment"># Inspeccionar el estado operativo de las reglas del firewall</span><br>
         <span class="cmd">sudo systemctl status crowdsec-firewall-bouncer</span>
     </div>
 
-    <div class="footer">
-        Documentación Interna - Módulo de Seguridad Perimetral
+    <h2>6. Resumen Operativo de Protección</h2>
+    <p>
+        El flujo de defensa en tiempo real opera de manera autónoma:
+    </p>
+    <ul class="space-y-2 text-xs text-slate-700 my-4">
+        <li>1. <strong>Lectura de Logs:</strong> Nginx registra los accesos web. El agente CrowdSec en Docker lee los logs en tiempo real.</li>
+        <li>2. <strong>Detección de Patrones:</strong> Si una IP intenta 10 peticiones fallidas seguidas o lanza exploits CVE, CrowdSec emite un bloqueo (*ban*).</li>
+        <li>3. <strong>Bloqueo a nivel Kernel:</strong> El Bouncer nativo recibe la IP hostil y añade una regla DROP en <code>nftables</code>. Las peticiones futuras de esa IP se descartan instantáneamente en la interfaz de red.</li>
+    </ul>
+
+    <div class="manual-bottom-actions">
+        <a href="../index.html" class="manual-back">← Volver a la portada</a>
+        <a href="#top" class="manual-top">↑ Volver arriba</a>
     </div>
 
+    <div class="footer">
+        Biblioteca técnica de <a href="https://aaronsgomez.es" target="_blank" rel="noopener">AaronSGomez</a> / <a href="https://github.com/AaronSGomez" target="_blank" rel="noopener">Github</a> &copy; 2026
+    </div>
+
+</div>
+
+<div class="mobile-scroll-controls" aria-label="Controles de desplazamiento">
+    <a href="../index.html" title="Volver al índice">🏠</a>
+    <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" title="Volver arriba">↑</button>
 </div>
 
 </body>

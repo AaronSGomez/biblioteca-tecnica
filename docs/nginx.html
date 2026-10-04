@@ -1,18 +1,22 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doc: Seguridad Nginx en Docker</title>
+    <title>Doc: Seguridad Nginx en Docker | Búnker Perimetral</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <link rel="stylesheet" href="../css/paginas.css">
 </head>
-<body>
+<body id="top">
 
 <div class="document-page">
 
-    <h1>Guía Paso a Paso: Búnker de Seguridad con Nginx y Docker</h1>
+    <div class="manual-actions">
+        <a href="../index.html" class="manual-back">← Volver al índice</a>
+    </div>
+
+    <h1>Guía Paso a Paso: Búnker de Seguridad Perimetral con Nginx y Docker</h1>
     <p>
         <span class="badge">Nginx</span>
         <span class="badge">Docker Compose</span>
@@ -21,26 +25,31 @@
     </p>
 
     <div class="note">
-        <strong>Objetivo de esta guía:</strong> Documentar la arquitectura de defensa perimetral para aislar un backend del acceso público. Se aplican políticas de restricción máxima (Zero Trust y Mínimo Privilegio) limitando drásticamente el tamaño de las peticiones, mitigando ataques DDoS y auditando el tráfico mediante un proxy inverso Nginx contenedorizado.
+        <strong>Objetivo de esta guía:</strong> Documentar el diseño de un "Búnker de Seguridad" perimetral para aislar un backend API de acceso público. Aplicamos los principios de <strong>Defensa en Profundidad (Zero Trust)</strong> y <strong>Mínimo Privilegio</strong>, restringiendo el tamaño máximo de los cuerpos de petición, mitigando ataques de denegación de servicio (DDoS/Slowloris) y garantizando la trazabilidad forense de logs mediante Nginx.
     </div>
 
-    <h2>1. Entendiendo la Arquitectura de Aislamiento</h2>
-    <p>La seguridad real empieza por la arquitectura física de la red. En lugar de exponer la base de datos o la aplicación directamente a internet, creamos capas de protección sucesivas (Arquitectura de Defensa en Profundidad).</p>
+    <h2>1. Arquitectura de Aislamiento en Profundidad (Zero Trust)</h2>
+    <p>
+        En la ingeniería de seguridad de infraestructura, exponer una base de datos relacional o una aplicación Java directamente a internet representa un riesgo inaceptable. Los escáneres automatizados detectan constantemente puertos abiertos (como el 8080 o 5432) intentando explotar vulnerabilidades conocidas (CVEs) o lanzar ataques de fuerza bruta.
+    </p>
+    <p>
+        Para mitigar este vector de ataque, aplicamos una arquitectura de <strong>Defensa en Profundidad</strong>. La base de datos y la API backend se ejecutan completamente "sordas" e invisibles al exterior dentro de una red privada virtual de Docker (<code>secure_net</code>). Nginx se sitúa en la frontera como un embudo de seguridad, filtrando cada petición antes de transmitirla a los contenedores internos.
+    </p>
     
     <div class="warning">
-        <strong>Concepto Clave:</strong> El Backend y la Base de Datos se ejecutan en una red privada virtual de Docker (<code>secure_net</code>). No tienen puertos expuestos al servidor físico host. El único que puede comunicarse con ellos es Nginx, y Nginx solo acepta peticiones que vengan del proxy principal (Apache) a nivel local.
+        <strong>Aislamiento Físico Garantizado:</strong> El backend y la base de datos PostgreSQL carecen de mapeo de puertos hacia la máquina host. Únicamente el contenedor de Nginx puede comunicarse con ellos por la red interna de Docker, y Nginx solo acepta conexiones locales originadas por el proxy Apache principal.
     </div>
     
     <div class="mermaid">
         graph LR
-        User((App Frontend/Web)) -- HTTPS/443 --> Apache[Apache Reverse Proxy]
+        User((Cliente Web / App)) -- HTTPS/443 --> Apache[Apache Reverse Proxy]
         
         subgraph "Servidor Host (Linux)"
             Apache -- 127.0.0.1:8081 --> Nginx[Docker Nginx :80]
             
-            subgraph "Docker Network (secure_net)"
-                Nginx -- Proxy Pass --> Backend[Docker Backend API :8080]
-                Backend -- Internal --> DB[(Base de Datos :5432)]
+            subgraph "Red Privada Docker (secure_net)"
+                Nginx -- Proxy Pass interno --> Backend[Docker Backend API :8080]
+                Backend -- Red interna --> DB[(Base de Datos PostgreSQL :5432)]
             end
         end
         
@@ -50,16 +59,21 @@
         style DB fill:#bbdefb,stroke:#1976d2,stroke-width:2px
     </div>
 
-    <h2>2. Aislamiento Físico (Docker Compose)</h2>
-    <p>El primer paso es configurar nuestro entorno de contenedores para cortar el acceso directo al backend y establecer a Nginx como el único embudo de entrada.</p>
+    <h2>2. Aislamiento Físico mediante Docker Compose</h2>
+    <p>
+        Configuramos la infraestructura de contenedores de modo que la directiva <code>ports</code> sea suprimida por completo en el servicio del backend. Al eliminar el binding de puertos, Docker no crea ninguna interfaz de escucha en la máquina física para ese contenedor, volviéndolo inaccesible ante escaneos de IP pública.
+    </p>
+    <p>
+        El contenedor <code>proxy_nginx</code> expone su puerto 80 amarrado estrictamente a la interfaz de bucle local <code>127.0.0.1:8081</code>, lo que impide que atacantes externos intenten saltarse la primera capa de cortafuegos conectándose directamente a la IP pública por el puerto 8081.
+    </p>
 
-    <div class="file-header">📄 docker-compose.yml</div>
+    <div class="file-header">📄 docker-compose.yml (Declaración de Red Segura)</div>
     <div class="file-content">services:
   api_backend:
     build: .
     container_name: app_backend
     restart: always
-    # ELIMINADO: El bloque 'ports' se suprime para hacerlo invisible al exterior
+    # AISLAMIENTO TOTAL: Se elimina 'ports' para hacerlo invisible en la máquina host
     networks:
       - secure_net
 
@@ -67,103 +81,125 @@
     image: nginx:alpine
     container_name: app_nginx
     ports:
-      # RESTRICCIÓN MÁXIMA: Nginx expone su puerto 80 SOLO al localhost (127.0.0.1)
+      # RESTRICCIÓN PERIMETRAL: Expuesto SOLO al bucle local 127.0.0.1
       - "127.0.0.1:8081:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - api_backend
     networks:
-      - secure_net</div>
+      - secure_net
+
+networks:
+  secure_net:
+    driver: bridge</div>
 
     <div class="note" style="border-left-color: #2196f3;">
-        <strong>Justificación de Seguridad:</strong> Al atar Nginx estrictamente a <code>127.0.0.1</code>, bloqueamos por diseño que un atacante intente saltarse Apache escaneando o atacando la IP pública del servidor por el puerto 8081. Nginx será completamente sordo a peticiones externas no enrutadas.
+        <strong>Justificación de Diseño:</strong> Si un atacante ejecuta un escaneo masivo de puertos (ej. <code>nmap</code>) sobre la IP pública del servidor, Nginx permanecerá totalmente invisible porque sólo responde a llamadas originadas internamente dentro del propio servidor host.
     </div>
 
-    <h2>3. Defensas Activas: Cortafuegos Restrictivo en Nginx</h2>
-    <p>Asumiendo que todo tráfico entrante es potencialmente hostil, se configuran reglas en Nginx con umbrales extremadamente bajos, ajustados milimétricamente al uso real de la API.</p>
+    <h2>3. Defensas Activas: Cortafuegos de Aplicación en Nginx</h2>
+    <p>
+        Partiendo del principio de <strong>Zero Trust (Confianza Cero)</strong>, asumimos que cualquier tráfico entrante es potencialmente malicioso. Por ello, configuramos en Nginx políticas de estrangulamiento de peticiones y restricciones de tamaño basadas en el perfil de uso real de la API.
+    </p>
 
-    <div class="file-header">📄 nginx.conf (Bloque http)</div>
+    <div class="file-header">📄 nginx.conf (Bloque HTTP - Rate Limiting & Ocultación)</div>
     <div class="file-content">http {
-    # 1. Ocultar huella del servidor a los atacantes (Evita perfilado de CVEs)
+    # 1. Ocultar la versión de Nginx en las cabeceras HTTP (Dificulta el perfilado de vulnerabilidades CVE)
     server_tokens off;
 
-    # 2. Zona de memoria para control estricto de IP (10MB) a un ritmo de 5 peticiones/seg
+    # 2. Asignar 10MB de RAM para rastrear IPs y limitar el tráfico a un máximo de 5 peticiones por segundo
     limit_req_zone $binary_remote_addr zone=api_limit:10m rate=5r/s;
 
     upstream backend_servers {
         server api_backend:8080; 
     }
-    # ...
 }</div>
 
-    <h3>3.1. Reglas de Protección (Bloque server)</h3>
-    <p>Dentro del servidor Nginx, aplicamos barreras diseñadas para estrangular cargas maliciosas antes de que consuman ciclos de CPU o memoria en el Backend.</br>
-      Json manda unos 3kb, con 56k se tiene un margen de seguridad amplio para cualquier petición legítima, pero se bloquea cualquier intento de subida de archivos o inyección de payloads gigantes.</p>
+    <h3>3.1. Reglas de Protección Anti-Exploit (Bloque Server)</h3>
+    <p>
+        Dentro de la configuración del servidor virtual de Nginx, aplicamos barreras diseñadas para descartar cargas maliciosas en la capa de red antes de que lleguen a consumir memoria o hilos de procesamiento en la aplicación Spring Boot.
+    </p>
+    <p>
+        Un Payload JSON legítimo emitido por una caja registradora Novapay ocupa entre 2KB y 4KB. Al establecer un límite de <strong>56KB</strong>, proporcionamos un margen de tolerancia amplio para peticiones legítimas mientras bloqueamos de inmediato (devuelviendo HTTP 413 Payload Too Large) cualquier intento de inyección de binarios o ataques de desbordamiento de búfer.
+    </p>
 
-    <div class="file-header">📄 nginx.conf (Bloque server)</div>
+    <div class="file-header">📄 nginx.conf (Bloque Server - Barreras de Protección)</div>
     <div class="file-content">    server {
         listen 80;
 
-        # BARRERA 1: Bloqueo de Payloads Pesados (Restricción a 56 Kilobytes, o menos). 
+        # BARRERA 1: Límite estricto de tamaño de cuerpo (56 Kilobytes máximo)
         client_max_body_size 56k;
 
-        # BARRERA 2: Timeouts Anti-Zombies (Corte agresivo a 10s)
+        # BARRERA 2: Timeouts defensivos contra ataques Slowloris (Corte a 10s)
         client_body_timeout 10s;
         client_header_timeout 10s;
         send_timeout 10s;
 
         location / {
-            # BARRERA 3: Ejecución implacable del Rate Limiting
+            # BARRERA 3: Aplicar Rate Limiting (Permite ráfaga puntual de 10 peticiones sin retardo)
             limit_req zone=api_limit burst=10 nodelay;
 
             proxy_pass http://backend_servers;
         }
     }</div>
 
-    <ul style="margin-bottom: 2rem;">
-        <li><strong>Límite Asfixiante de 56k:</strong> Calculado basándose en el peso real máximo de un JSON legítimo de la aplicación. Bloquea instantáneamente (Error 413) intentos de desbordamiento de búfer o subida de binarios.</li>
-        <li><strong>Timeouts Agresivos (10s):</strong> Mitiga ataques tipo "Slowloris", cortando conexiones de clientes que envían datos a cuentagotas para agotar los hilos disponibles.</li>
-        <li><strong>Burst=10 nodelay:</strong> Permite una ventana de 10 peticiones rápidas para carga inicial, pero a partir de ahí bloquea sin piedad cualquier ráfaga de fuerza bruta devolviendo Error 503.</li>
+    <ul class="space-y-2 text-xs text-slate-700 my-4">
+        <li><strong>Límite Restrictivo de 56KB:</strong> Diseñado específicamente para APIs REST. Evita que un atacante sature la memoria RAM del servidor enviando ficheros gigantescos o archivos maliciosos.</li>
+        <li><strong>Timeouts Agresivos (10s):</strong> Neutralizan ataques tipo <em>Slowloris</em>, en los cuales los clientes abren conexiones y envían datos byte a byte a velocidad extremadamente lenta para agotar la tabla de sockets del servidor.</li>
+        <li><strong>Rate Limiting (Rate=5r/s, Burst=10 nodelay):</strong> Permite ráfagas normales de uso de la aplicación, pero bloquea con código HTTP 503 cualquier script que intente realizar ataques de fuerza bruta.</li>
     </ul>
 
-    <h2>4. Auditoría y Trazabilidad (Logs)</h2>
-    <p>Dado que la API opera detrás de múltiples proxies (Apache -> Nginx -> Docker), las IP entrantes se enmascaran como locales. Se implementa una trazabilidad absoluta para extraer el origen real del tráfico.</p>
+    <h2>4. Auditoría Forense y Trazabilidad de IPs en Logs</h2>
+    <p>
+        Debido a que la petición atraviesa múltiples capas de proxies (Cliente → Apache → Nginx → Backend Java), por defecto la IP origen que registraría el backend sería <code>127.0.0.1</code>. Para mantener una trazabilidad forense completa en caso de incidente de seguridad, Nginx captura e inyecta las cabeceras HTTP <code>X-Real-IP</code> y <code>X-Forwarded-For</code>.
+    </p>
 
-    <div class="file-header">📄 nginx.conf (Cabeceras y Logs)</div>
-    <div class="file-content">    # 1. Formato personalizado para capturar la IP real y el Vector de Ataque
+    <div class="file-header">📄 nginx.conf (Propagación de Cabeceras e Formato de Log)</div>
+    <div class="file-content">    # Formato de log personalizado para capturar IP cliente real y User-Agent
     log_format main '$remote_addr - $remote_user [$time_local] "$request" '
                     '$status $body_bytes_sent "$http_referer" '
                     '"$http_user_agent" "$http_x_forwarded_for"';
 
-    # 2. Aplicar la política de logs
     access_log /var/log/nginx/access.log main;
 
     location / {
-        # 3. Inyectar la IP real a las cabeceras hacia el Backend
+        # Propagar la IP pública original hacia los contenedores de la red interna
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_pass http://backend_servers;
     }</div>
 
-    <h3>4.1. Comandos de Inspección (Respuesta a Incidentes)</h3>
-    <p>Comandos operativos para auditar el sistema o reaccionar ante anomalías de tráfico.</p>
+    <h3>4.1. Comandos Operativos de Inspección de Incidentes</h3>
+    <p>
+        Comandos de terminal para auditar en tiempo real las peticiones bloqueadas por las defensas perimetrales de Nginx:
+    </p>
 
     <div class="terminal">
-        <span class="comment"># Monitorizar el tráfico en tiempo real atravesando las defensas</span>
+        <span class="comment"># Monitorizar el flujo de logs en tiempo real atravesando el Proxy</span>
         <div class="cmd">docker logs -f app_nginx</div>
 
-        <span class="comment"># Cazar IPs bloqueadas por el limitador de velocidad (Rate Limiting)</span>
+        <span class="comment"># Filtrar las IPs que han sido bloqueadas por exceso de peticiones (Rate Limiting)</span>
         <div class="cmd">docker logs app_nginx | grep "limiting requests"</div>
 
-        <span class="comment"># Identificar intentos de inyección de payloads gigantes (>56KB)</span>
+        <span class="comment"># Identificar intentos de ataques por inyección de payloads mayores a 56KB</span>
         <div class="cmd">docker logs app_nginx | grep "client intended to send too large body"</div>
     </div>
 
-    <div class="footer">
-        Documentación de Arquitectura de Seguridad y Redes.
+    <div class="manual-bottom-actions">
+        <a href="../index.html" class="manual-back">← Volver a la portada</a>
+        <a href="#top" class="manual-top">↑ Volver arriba</a>
     </div>
 
+    <div class="footer">
+        Biblioteca técnica de <a href="https://aaronsgomez.es" target="_blank" rel="noopener">AaronSGomez</a> / <a href="https://github.com/AaronSGomez" target="_blank" rel="noopener">Github</a> &copy; 2026
+    </div>
+
+</div>
+
+<div class="mobile-scroll-controls" aria-label="Controles de desplazamiento">
+    <a href="../index.html" title="Volver al índice">🏠</a>
+    <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" title="Volver arriba">↑</button>
 </div>
 
 <script>

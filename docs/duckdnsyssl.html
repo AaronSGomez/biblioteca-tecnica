@@ -1,15 +1,19 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Dominio y Proxy Inverso FREE</title>
+    <title>Multi-Dominio y Proxy Inverso FREE | DuckDNS & Apache</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <link rel="stylesheet" href="../css/paginas.css">
 </head>
-<body>
+<body id="top">
 
 <div class="document-page">
+
+    <div class="manual-actions">
+        <a href="../index.html" class="manual-back">← Volver al índice</a>
+    </div>
 
     <h1>Guía Paso a Paso: Servidor Multi-Dominio con DuckDNS y Apache</h1>
     <p>
@@ -20,43 +24,51 @@
     </p>
 
     <div class="note">
-        <strong>Objetivo de esta guía:</strong> Explicar desde cero cómo registrar dominios gratuitos, automatizar la actualización de la IP pública sin depender del router, y enrutar correctamente el tráfico web hacia contenedores Docker independientes utilizando Apache como Proxy Inverso. Ideal para laboratorios caseros y portfolios.
+        <strong>Objetivo de esta guía:</strong> Explicar detalladamente cómo registrar subdominios gratuitos en DuckDNS, automatizar la actualización de IP pública residencial mediante tareas de sistema Linux y enrutar correctamente el tráfico entrante hacia múltiples microservicios en contenedores Docker mediante Apache como Proxy Inverso de Capa 7 con SSL/TLS automatizado.
     </div>
 
     <h2>1. Registro de Dominios en DuckDNS</h2>
-    <p>DuckDNS es un servicio de DNS Dinámico (DDNS) gratuito y sin caducidad mensual. Para empezar, necesitamos vincular nuestra IP pública a nombres de dominio legibles.</p>
+    <p>
+        La inmensa mayoría de las conexiones a internet residenciales disponen de direcciones IP públicas dinámicas asignadas por el proveedor de servicios (ISP). Esto significa que la IP cambia periódicamente o tras reiniciar el router. Para poder publicar servicios web o proyectos sin necesidad de contratar una IP fija comercial, utilizamos un servicio de <strong>DNS Dinámico (DDNS)</strong> como DuckDNS.
+    </p>
+    <p>
+        DuckDNS vincula nombres de dominio estables (ej. <code>miproyecto.duckdns.org</code>) a nuestra IP cambiante, respondiendo a las consultas DNS globales con la dirección de red más reciente de nuestro servidor.
+    </p>
     
     <ol>
-        <li><strong>Acceso:</strong> Entra en <a href="https://www.duckdns.org" target="_blank">duckdns.org</a>.</li>
-        <li><strong>Autenticación Segura:</strong> Inicia sesión utilizando un proveedor OAuth. <strong>Recomendamos encarecidamente usar GitHub</strong> para mantener tu infraestructura vinculada a tu perfil de desarrollador y garantizar un acceso seguro con autenticación en dos pasos (2FA).</li>
-        <li><strong>Límites:</strong> Una cuenta gratuita te permite registrar hasta <strong>5 dominios (subdominios de .duckdns.org)</strong>.</li>
-        <li><strong>Creación:</strong> En la casilla "sub domain", escribe el nombre deseado y pulsa "add domain". Para esta arquitectura crearemos tres dominios de ejemplo:
+        <li><strong>Acceso al Portal:</strong> Acceda a la plataforma oficial en <a href="https://www.duckdns.org" target="_blank" rel="noopener">duckdns.org</a>.</li>
+        <li><strong>Autenticación OAuth Segura:</strong> Inicie sesión utilizando su cuenta de <strong>GitHub</strong>. Esto permite vincular su infraestructura de servidores a su perfil de desarrollador y aplicar mecanismos de doble factor (2FA).</li>
+        <li><strong>Límites del Plan Gratuito:</strong> Una única cuenta permite gestionar hasta <strong>5 subdominios gratuitos de nivel superior (.duckdns.org)</strong>.</li>
+        <li><strong>Creación de Nombres de Dominio:</strong> En la sección "sub domain", registre los subdominios que identificarán a los servicios independientes del servidor. Para esta arquitectura crearemos:
             <ul>
-                <li><code>miproyecto-web.duckdns.org</code> (Para nuestro Dashboard web HTML).</li>
-                <li><code>miproyecto-erp.duckdns.org</code> (Para nuestro contenedor de Odoo).</li>
-                <li><code>miproyecto-api.duckdns.org</code> (Para nuestra futura API de Spring Boot).</li>
+                <li><code>miproyecto-web.duckdns.org</code> (Portal web y Dashboard HTML).</li>
+                <li><code>miproyecto-erp.duckdns.org</code> (Instancia ERP de Odoo).</li>
+                <li><code>miproyecto-api.duckdns.org</code> (Backend de microservicios Spring Boot).</li>
             </ul>
         </li>
-        <li><strong>El Token de Seguridad:</strong> En la parte superior de la página principal, verás un campo llamado <strong>Token</strong> (una cadena larga de números y letras, ej. <code>a1b2c3d4...</code>). Cópialo; es la clave maestra que usará nuestro servidor para identificarse.</li>
+        <li><strong>Token de Seguridad (Master Token):</strong> En la cabecera de la cuenta obtendrá su <strong>Token maestro</strong> (una cadena alfanumérica UUID). Este token actúa como credencial secreta para autenticar los scripts de actualización de la máquina host frente a los servidores de DuckDNS.</li>
     </ol>
 
-    <h2>2. Entendiendo el Proxy Inverso y los Puertos (Localhost)</h2>
-    <p>¿Por qué usamos direcciones como <code>localhost:8069</code> en nuestra configuración? La respuesta está en la contenedorización (Docker).</p>
+    <h2>2. Arquitectura de Proxy Inverso y Enrutamiento de Puertos</h2>
+    <p>
+        Cuando desplegamos servicios aislados mediante tecnología de contenedores (Docker), cada aplicación escucha en un puerto de red interno en <code>localhost</code> (por ejemplo, Odoo en el puerto <code>8069</code> y Spring Boot en el <code>8080</code>). Exponer estos puertos directamente a internet obligaría al usuario a escribir direcciones complejas como <code>midominio.com:8069</code>, lo que resulta ineficiente, poco estético y vulnerable ante escaneos de puertos directos.
+    </p>
+    <p>
+        Para resolverlo, colocamos un <strong>Proxy Inverso (Apache Web Server)</strong> actuando en la frontera de red (puertos estándar HTTP 80 y HTTPS 443). Apache recibe todas las peticiones públicas, examina la cabecera HTTP <code>Host</code> del navegador entrante y redirige el tráfico internamente hacia el contenedor Docker correspondiente.
+    </p>
     
     <div class="warning">
-        <strong>Concepto Clave:</strong> Cuando desplegamos una aplicación en Docker, esta se ejecuta de forma aislada. Odoo, por defecto, escucha en el puerto <strong>8069</strong> dentro de su contenedor. Spring Boot escucha en el <strong>8080</strong>.
+        <strong>Aislamiento de Capa 7:</strong> El Proxy Inverso permite que una única dirección IP pública y un único puerto estándar HTTPS (443) den servicio a decenas de aplicaciones independientes ejecutándose en puertos locales distintos.
     </div>
-    
-    <p>A través de Docker, "mapeamos" esos puertos internos hacia nuestro servidor host (<code>localhost</code>). Como no es seguro ni estético obligar al usuario final a escribir números de puerto en su navegador, colocamos un <strong>Proxy Inverso (Apache)</strong> en la puerta principal (puertos 80/443). Apache recibe el tráfico de los dominios limpios y lo redirige internamente al puerto de <code>localhost</code> correspondiente.</p>
     
     <div class="mermaid">
         graph LR
-        User((Cliente Web)) -- HTTPS/443 --> Apache[Apache Reverse Proxy]
+        User((Cliente Web / Navegador)) -- HTTPS/443 --> Apache[Apache Reverse Proxy]
         
-        subgraph "Servidor Host (Linux)"
+        subgraph "Servidor Host (Linux / Raspberry Pi)"
             Apache -- miproyecto-web.duckdns.org --> HTML[Directorio Web /var/www/html]
-            Apache -- miproyecto-erp.duckdns.org --> Odoo[Docker Odoo :8069]
-            Apache -- miproyecto-api.duckdns.org --> Java[Docker Spring Boot :8080]
+            Apache -- miproyecto-erp.duckdns.org --> Odoo[Contenedor Odoo :8069]
+            Apache -- miproyecto-api.duckdns.org --> Java[Contenedor Spring Boot :8080]
         end
         
         style Apache fill:#ffecb3,stroke:#fbc02d,stroke-width:2px
@@ -65,54 +77,61 @@
         style Java fill:#ffcc80,stroke:#e65100,stroke-width:2px
     </div>
 
-    <h2>3. Automatización de la IP (Script Cron)</h2>
-    <p>Dado que muchos routers bloquean o no incluyen la opción de configurar DuckDNS nativamente, configuraremos el propio servidor Linux para que actualice la IP pública automáticamente cada 5 minutos.</p>
+    <h2>3. Automatización de Actualización de IP (Script Cron)</h2>
+    <p>
+        Dado que los routers residenciales suelen carecer de clientes DDNS personalizables o bloquean proveedores externos, configuramos el propio sistema operativo Linux del servidor para que notifique a DuckDNS cualquier cambio en la IP pública cada 5 minutos mediante una tarea programada (Cron).
+    </p>
     
     <div class="terminal">
-        <span class="comment"># 1. Crear directorio y script de actualización</span>
+        <span class="comment"># 1. Crear directorio dedicado e iniciar el script bash</span>
         <div class="cmd">mkdir ~/duckdns && cd ~/duckdns</div>
         <div class="cmd">nano duck.sh</div>
 
-        <span class="comment"># Contenido del script (Sustituye los dominios y pon tu Token de la web):</span>
+        <span class="comment"># Contenido del script (Consulta la API HTTPS de DuckDNS utilizando cURL):</span>
         <span class="comment"># echo url="https://www.duckdns.org/update?domains=miproyecto-web,miproyecto-erp,miproyecto-api&token=TU_TOKEN_SECRETO&ip=" | curl -k -o ~/duckdns/duck.log -K -</span>
 
-        <span class="comment"># 2. Dar permisos de ejecución al script</span>
+        <span class="comment"># 2. Otorgar permisos de ejecución restrictivos (Solo el propietario puede leer/ejecutar)</span>
         <div class="cmd">chmod 700 duck.sh</div>
 
-        <span class="comment"># 3. Añadir a Cron para que se ejecute silenciosamente cada 5 minutos</span>
+        <span class="comment"># 3. Registrar el demonio en Crontab para ejecución en segundo plano cada 5 minutos</span>
         <div class="cmd">crontab -e</div>
-        <span class="comment"># Añade esta línea al final del archivo:</span>
+        <span class="comment"># Añadir la siguiente línea al final del fichero:</span>
         <span class="comment"># */5 * * * * ~/duckdns/duck.sh >/dev/null 2>&1</span>
     </div>
 
-    <h3>3.1. Verificación de Conexión (Logs)</h3>
-    <p>Una vez creado el script y programada la tarea, es fundamental realizar una prueba manual para comprobar que nuestro servidor se está comunicando correctamente con DuckDNS.</p>
+    <h3>3.1. Verificación de Trazabilidad y Logs</h3>
+    <p>
+        Tras la puesta en marcha del script, realizamos una llamada manual de control para certificar que las peticiones cURL son aceptadas por los servidores de DuckDNS y que no existen bloqueos por parte del cortafuegos de salida.
+    </p>
     
     <div class="terminal">
-        <span class="comment"># 1. Ejecutamos el script manualmente por primera vez</span>
+        <span class="comment"># 1. Ejecutar el script manualmente</span>
         <div class="cmd">~/duckdns/duck.sh</div>
 
-        <span class="comment"># 2. Leemos la respuesta guardada en el archivo log</span>
+        <span class="comment"># 2. Inspeccionar la respuesta escrita en el fichero de log</span>
         <div class="cmd">cat ~/duckdns/duck.log</div>
     </div>
 
     <div class="note" style="border-left-color: #4caf50;">
-        <strong>✅ Si el log responde "OK":</strong> ¡Éxito absoluto! Tu IP pública se ha sincronizado correctamente. El servidor ya es autónomo y mantendrá tus dominios actualizados en segundo plano.
+        <strong>✅ Respuesta esperada ("OK"):</strong> Indica que la actualización DNS ha sido procesada con éxito. La IP pública actual del servidor se ha asociado a todos los subdominios listados.
     </div>
 
     <div class="warning" style="border-left-color: #f44336; background-color: #ffebee;">
-        <strong>❌ Si el log responde "KO":</strong> La petición ha sido rechazada por DuckDNS. Pasos para solucionarlo:
+        <strong>❌ Respuesta de error ("KO"):</strong> La solicitud ha sido rechazada por el API de DuckDNS. Verifique los siguientes puntos técnicos:
         <ul>
-            <li>Abre tu script (<code>nano ~/duckdns/duck.sh</code>) y verifica que el <strong>Token</strong> sea exactamente igual al de tu cuenta.</li>
-            <li>Comprueba que los nombres de los dominios (<code>domains=...</code>) estén separados únicamente por comas y sin espacios.</li>
-            <li>Asegúrate de que no te falte ninguna comilla (<code>"</code>) en la estructura del comando.</li>
+            <li>Compruebe que el <strong>Token</strong> sea exacto y no contenga espacios ni saltos de línea accidentalmente copiados.</li>
+            <li>Asegúrese de que los subdominios (<code>domains=...</code>) estén separados estrictamente por comas sin espacios intermedios.</li>
+            <li>Confirme que el binario <code>curl</code> está instalado y dispone de conectividad de salida por el puerto 443.</li>
         </ul>
     </div>
 
     <h2>4. Configuración de VirtualHosts en Apache</h2>
-    <p>Debemos crear un archivo de configuración para cada servicio en <code>/etc/apache2/sites-available/</code>.</p>
+    <p>
+        Para cada subdominio registrado, debemos definir un fichero de VirtualHost en Apache (<code>/etc/apache2/sites-available/</code>). Esto instruye al servidor web sobre cómo procesar las solicitudes entrantes dependiendo de la cabecera HTTP <code>ServerName</code>.
+    </p>
 
     <h3>4.1. Dashboard Principal (Página Estática HTML)</h3>
+    <p>Servicio web directo apuntando al sistema de ficheros local donde residen la portada y las guías de esta biblioteca técnica.</p>
     <div class="file-header">📄 /etc/apache2/sites-available/000-default.conf</div>
     <div class="file-content">&lt;VirtualHost *:80&gt;
     ServerName miproyecto-web.duckdns.org
@@ -122,67 +141,83 @@
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 &lt;/VirtualHost&gt;</div>
 
-    <h3>4.2. Contenedor de Odoo</h3>
+    <h3>4.2. Contenedor de ERP Odoo</h3>
+    <p>Redirección mediante <code>ProxyPass</code> hacia el puerto 8069 expuesto por el contenedor Docker de Odoo. La directiva <code>ProxyPreserveHost On</code> es fundamental para mantener el dominio original en la sesión del cliente.</p>
     <div class="file-header">📄 /etc/apache2/sites-available/odoo-docker.conf</div>
     <div class="file-content">&lt;VirtualHost *:80&gt;
     ServerName miproyecto-erp.duckdns.org
 
     ProxyPreserveHost On
     ProxyRequests Off
-    # Redirección al puerto local expuesto por Docker
+    # ProxyPass hacia el puerto local expuesto por Docker
     ProxyPass / http://localhost:8069/
     ProxyPassReverse / http://localhost:8069/
     
     RequestHeader set "X-Forwarded-Proto" "https"
 &lt;/VirtualHost&gt;</div>
 
-    <h3>4.3. Contenedor de Spring Boot (API Java)</h3>
+    <h3>4.3. Contenedor de Backend Spring Boot (API Java)</h3>
+    <p>Enrutamiento hacia el puerto 8080 donde escucha la aplicación ejecutable Java contenedorizada.</p>
     <div class="file-header">📄 /etc/apache2/sites-available/api-spring.conf</div>
     <div class="file-content">&lt;VirtualHost *:80&gt;
     ServerName miproyecto-api.duckdns.org
 
     ProxyPreserveHost On
     ProxyRequests Off
-    # Redirección al puerto local expuesto por Docker
+    # ProxyPass hacia el puerto local expuesto por Docker
     ProxyPass / http://localhost:8080/
     ProxyPassReverse / http://localhost:8080/
     
     RequestHeader set "X-Forwarded-Proto" "https"
 &lt;/VirtualHost&gt;</div>
 
-    <h2>5. Activación y Seguridad SSL (HTTPS)</h2>
-    <p>Finalmente, activamos los sitios y utilizamos Let's Encrypt mediante Certbot para generar certificados de seguridad gratuitos, forzando la redirección de todo el tráfico a HTTPS.</p>
+    <h2>5. Activación de Sitios y Certificados SSL (Certbot / Let's Encrypt)</h2>
+    <p>
+        Una vez creados los ficheros de VirtualHost, habilitamos la configuración en Apache e invocamos el cliente de automatización de certificados Certbot. Certbot utiliza el protocolo ACME para validar la propiedad de los dominios mediante el reto HTTP-01 y genera certificados X.509 firmados por Let's Encrypt de forma automática.
+    </p>
 
     <div class="terminal">
-        <span class="comment"># 1. Habilitar sitios y recargar Apache</span>
+        <span class="comment"># 1. Habilitar las configuraciones en Apache y recargar el servicio</span>
         <div class="cmd">sudo a2ensite odoo-docker.conf api-spring.conf</div>
         <div class="cmd">sudo systemctl reload apache2</div>
 
-        <span class="comment"># 2. Generar certificados SSL (Elige "Redireccionar" cuando pregunte)</span>
+        <span class="comment"># 2. Invocación de Certbot para generar SSL y forzar la redirección automática a HTTPS (443)</span>
         <div class="cmd">sudo certbot --apache -d miproyecto-web.duckdns.org</div>
         <div class="cmd">sudo certbot --apache -d miproyecto-erp.duckdns.org</div>
         <div class="cmd">sudo certbot --apache -d miproyecto-api.duckdns.org</div>
     </div>
 
-    <h2>6. Preparación del Entorno (VS Code Remote SSH)</h2>
-    <p>Para poder editar el código de nuestro Dashboard directamente desde Visual Studio Code sin problemas de permisos (evitando usar <code>sudo</code>), ajustamos la propiedad de la carpeta web.</p>
+    <h2>6. Permisos del Sistema de Ficheros (VS Code Remote SSH)</h2>
+    <p>
+        Para poder trabajar en el desarrollo del Dashboard web en <code>/var/www/html</code> directamente desde Visual Studio Code mediante la extensión Remote SSH sin requerir permisos de superusuario (<code>sudo</code>) constantes, ajustamos la propiedad POSIX del directorio asignándolo al usuario activo y manteniendo al grupo del servidor Apache (<code>www-data</code>).
+    </p>
 
     <div class="terminal">
-        <span class="comment"># Otorgar propiedad del directorio al usuario activo, manteniendo al grupo de Apache (www-data)</span>
+        <span class="comment"># 1. Transferir la propiedad del directorio al usuario activo manteniendo el grupo www-data</span>
         <div class="cmd">sudo chown -R $USER:www-data /var/www/html</div>
 
-        <span class="comment"># Establecer permisos: Lectura/Escritura para el dueño y grupo; solo lectura para otros</span>
+        <span class="comment"># 2. Configurar permisos 775 (Lectura/Escritura/Ejecución para usuario y grupo)</span>
         <div class="cmd">sudo chmod -R 775 /var/www/html</div>
     </div>
 
     <div class="note" style="border-left-color: #ff9800; background-color: #fff3e0; color: #e65100;">
-        <strong>⚠️ Nota de Seguridad para Producción:</strong> Los permisos <code>775</code> son ideales para entornos de desarrollo y laboratorios caseros, ya que permiten editar archivos fácilmente. En un entorno de producción empresarial estricto, se utilizaría <code>755</code> o <code>644</code> para evitar que un posible compromiso del usuario <code>www-data</code> permita alterar el código fuente.
+        <strong>⚠️ Consideración de Seguridad para Producción:</strong> Los permisos <code>775</code> son adecuados en entornos de laboratorio o desarrollo local. En servidores de producción expuestos a alto tráfico, se deben aplicar permisos restrictivos <code>755</code> (directorios) y <code>644</code> (ficheros) para evitar que un proceso web comprometido modifique el código fuente estático.
+    </div>
+
+    <div class="manual-bottom-actions">
+        <a href="../index.html" class="manual-back">← Volver a la portada</a>
+        <a href="#top" class="manual-top">↑ Volver arriba</a>
     </div>
 
     <div class="footer">
-        Documentación de Infraestructura generada para Portfolio Técnico.
+        Biblioteca técnica de <a href="https://aaronsgomez.es" target="_blank" rel="noopener">AaronSGomez</a> / <a href="https://github.com/AaronSGomez" target="_blank" rel="noopener">Github</a> &copy; 2026
     </div>
 
+</div>
+
+<div class="mobile-scroll-controls" aria-label="Controles de desplazamiento">
+    <a href="../index.html" title="Volver al índice">🏠</a>
+    <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" title="Volver arriba">↑</button>
 </div>
 
 <script>
