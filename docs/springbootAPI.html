@@ -29,7 +29,7 @@
                 height: 350px;
             }
         }
-        
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #fdfbf7; /* Warm neutral background */
@@ -97,71 +97,29 @@
     
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
-<body class="manual-app flex h-screen overflow-hidden">
-
-    <!-- Sidebar Navigation -->
-    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-10 shadow-sm">
-        <div class="p-6 border-b border-gray-100">
-            <h1 class="text-xl font-bold text-gray-800 tracking-tight">VeriFactu<span class="text-orange-600">Dev</span></h1>
-            <p class="text-xs text-gray-500 mt-1">Backend Architecture & Ops</p>
-        </div>
-        <nav class="flex-1 overflow-y-auto py-4">
-            <ul class="space-y-1">
-                <li>
-                    <button onclick="navTo('dashboard')" id="nav-dashboard" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 active-nav transition-colors">
-                        📊 Estado del Proyecto
-                    </button>
-                </li>
-                <li>
-                    <button onclick="navTo('backend')" id="nav-backend" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        ⚙️ Arquitectura Spring Boot
-                    </button>
-                </li>
-                <li>
-                    <button onclick="navTo('flow')" id="nav-flow" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        🔀 Enrutador Fiscal
-                    </button>
-                </li>
-                <li>
-                    <button onclick="navTo('reliability')" id="nav-reliability" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        🛡️ Resiliencia y Retries
-                    </button>
-                </li>
-                <li>
-                    <button onclick="navTo('deployment')" id="nav-deployment" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        🚀 Docker & Despliegue
-                    </button>
-                </li>
-            </ul>
-        </nav>
-        <div class="p-4 border-t border-gray-100 bg-gray-50">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xs">JS</div>
-                <div>
-                    <p class="text-sm font-medium text-gray-900">Admin Dev</p>
-                    <p class="text-xs text-gray-500">Raspberry Pi Node</p>
-                </div>
-            </div>
-        </div>
-    </aside>
+<body id="top" class="manual-app manual-document">
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto bg-[#fdfbf7] p-4 md:p-8" id="main-content">
-        
-        <!-- Mobile Header -->
-        <div class="md:hidden flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-            <h1 class="text-lg font-bold text-gray-800">VeriFactu<span class="text-orange-600">Dev</span></h1>
-            <select onchange="navTo(this.value)" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2.5">
-                <option value="dashboard">Estado</option>
-                <option value="backend">Backend</option>
-                <option value="flow">Enrutador</option>
-                <option value="reliability">Resiliencia</option>
-                <option value="deployment">Despliegue</option>
-            </select>
+    <header class="manual-header">
+        <div class="manual-header-content">
+            <p class="manual-eyebrow">DOCUMENTACIÓN DE BACKEND</p>
+            <h1>Informe Backend</h1>
+            <p>Spring Boot · VeriFactu · TicketBAI · Docker</p>
         </div>
+    </header>
 
+    <main class="manual-content" id="main-content">
+        <div class="manual-actions">
+            <a href="../index.html" class="manual-back">← Volver al índice</a>
+            <a href="#top" class="manual-top">↑ Volver arriba</a>
+        </div>
+        <div class="mobile-scroll-controls" aria-label="Controles de desplazamiento">
+            <button type="button" onclick="window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })" aria-label="Bajar">↓</button>
+            <button type="button" onclick="window.scrollBy({ top: -window.innerHeight * 0.8, behavior: 'smooth' })" aria-label="Subir">↑</button>
+        </div>
+        
         <!-- SECTION: DASHBOARD -->
-        <section id="dashboard" class="space-y-6 animate-fade-in">
+        <section id="dashboard" class="manual-section space-y-6 animate-fade-in">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Resumen Ejecutivo y Estado Actual</h2>
                 <p class="text-gray-600 leading-relaxed">
@@ -241,7 +199,7 @@
         </section>
 
         <!-- SECTION: BACKEND ARCHITECTURE -->
-        <section id="backend" class="hidden space-y-6 animate-fade-in">
+        <section id="backend" class="manual-section space-y-6 animate-fade-in">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Arquitectura Spring Boot</h2>
                 <p class="text-gray-600 leading-relaxed">
@@ -386,7 +344,7 @@ TABLE invoices (
         </section>
 
         <!-- SECTION: FISCAL ROUTER -->
-        <section id="flow" class="hidden space-y-6 animate-fade-in">
+        <section id="flow" class="manual-section space-y-6 animate-fade-in">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">El "Router" Fiscal</h2>
                 <p class="text-gray-600 leading-relaxed">
@@ -445,7 +403,7 @@ TABLE invoices (
         </section>
 
         <!-- SECTION: RELIABILITY -->
-        <section id="reliability" class="hidden space-y-6 animate-fade-in">
+        <section id="reliability" class="manual-section space-y-6 animate-fade-in">
              <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Sistema de Reintentos y Cola</h2>
                 <p class="text-gray-600 leading-relaxed">
@@ -497,7 +455,7 @@ TABLE invoices (
         </section>
 
         <!-- SECTION: DEPLOYMENT -->
-        <section id="deployment" class="hidden space-y-6 animate-fade-in">
+        <section id="deployment" class="manual-section space-y-6 animate-fade-in">
              <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Infraestructura Docker & Despliegue</h2>
                 <p class="text-gray-600 leading-relaxed">
@@ -575,36 +533,6 @@ TABLE invoices (
             statusChartInstance: null,
             flowRegion: null
         };
-
-        // --- Navigation Logic ---
-        function navTo(sectionId) {
-            // Update UI State
-            document.querySelectorAll('section').forEach(el => {
-                el.classList.add('hidden');
-            });
-            document.getElementById(sectionId).classList.remove('hidden');
-            
-            // Mobile Dropdown Sync
-            const mobileSelect = document.querySelector('select');
-            if(mobileSelect) mobileSelect.value = sectionId;
-
-            // Desktop Sidebar Sync
-            document.querySelectorAll('.active-nav').forEach(el => {
-                el.classList.remove('active-nav', 'text-orange-600', 'border-right');
-                el.classList.add('text-gray-700');
-            });
-            const activeBtn = document.getElementById(`nav-${sectionId}`);
-            if (activeBtn) {
-                activeBtn.classList.add('active-nav');
-                activeBtn.classList.remove('text-gray-700');
-            }
-
-            state.currentSection = sectionId;
-
-            // Initialize Charts if needed (Lazy Load)
-            if (sectionId === 'dashboard' && !state.statusChartInstance) initStatusChart();
-            if (sectionId === 'reliability' && !state.retryChartInstance) initRetryChart();
-        }
 
         // --- Chart.js: Status Chart ---
         function initStatusChart() {
@@ -748,6 +676,7 @@ TABLE invoices (
         // Initialize
         window.addEventListener('load', () => {
             initStatusChart();
+            initRetryChart();
         });
 
     </script>
