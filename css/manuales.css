@@ -67,6 +67,15 @@
   margin: 0 0 24px;
 }
 
+.manual-bottom-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 36px 0 12px;
+  padding-top: 18px;
+  border-top: 1px solid #dddddd;
+}
+
 .manual-back,
 .manual-top {
   display: inline-block;
