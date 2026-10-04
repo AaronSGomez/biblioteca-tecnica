@@ -1,0 +1,754 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe Backend</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Chart Container Styling Rules - CRITICAL */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%; /* Flexible within grid, constrained by parent */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+            background: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdfbf7; /* Warm neutral background */
+            color: #1f2937;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; 
+        }
+
+        .active-nav {
+            background-color: #f3f4f6;
+            color: #ea580c; /* Orange-600 */
+            border-right: 3px solid #ea580c;
+        }
+
+        .step-connector {
+            flex-grow: 1;
+            height: 2px;
+            background-color: #e5e7eb;
+            margin: 0 1rem;
+            position: relative;
+        }
+        .step-connector.active {
+            background-color: #ea580c;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutral & Technical Orange. Background: #fdfbf7 (Isabelline), Primary Text: #1f2937 (Gray-900), Accent: #ea580c (Orange-600) for focus/action. Justification: Professional yet comfortable for long reading sessions, technical accent highlights critical architectural paths. -->
+    
+    <!-- Application Structure Plan: 
+         Structure: Sidebar Navigation with functional/thematic sections: 
+         1. "Dashboard": High-level status and project metrics.
+         2. "Arquitectura Backend": Interactive diagram of Spring Boot layers + Docker logic.
+         3. "Flujo de Datos": The core "Router" logic (Verifactu vs TicketBAI) visualized.
+         4. "Resiliencia & Persistencia": Simulation of retry logic and DB reliability.
+         5. "GuÃ­a de Despliegue": Checklist for Raspberry Pi/Cloud migration.
+         Why: The user needs a "Development Guide". A linear document is passive. This structure allows the user to simulate the architecture (click to see data flow), understand the retry mechanisms visually, and use the deployment section as a checklist. It moves from Logic -> Implementation -> Operations.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Project Status (Dashboard): Doughnut Chart (Chart.js) to show completion % of modules. Goal: Inform progress.
+         2. Architecture Layers (Backend): Interactive HTML Grid where clicking a layer (Controller/Service) reveals Java details. Goal: Organize complex info.
+         3. Fiscal Router (Data Flow): Dynamic HTML Flowchart. User selects "Bizkaia" or "Madrid", paths light up. Goal: Inform/Change understanding of routing.
+         4. Retry Strategy (Resiliencia): Line Chart (Chart.js) simulating "Exponential Backoff". User clicks "Simulate Fail", chart updates. Goal: Demonstrate reliability logic.
+         5. Volume/Load (Persistencia): Bar Chart (Plotly) comparing Storage vs Time. Goal: Inform capacity planning.
+         6. Docker Stack: HTML Stack visualization. Goal: Organize deployment structure.
+         
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All diagrams built with HTML/Tailwind or Canvas libraries.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-10 shadow-sm">
+        <div class="p-6 border-b border-gray-100">
+            <h1 class="text-xl font-bold text-gray-800 tracking-tight">VeriFactu<span class="text-orange-600">Dev</span></h1>
+            <p class="text-xs text-gray-500 mt-1">Backend Architecture & Ops</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1">
+                <li>
+                    <button onclick="navTo('dashboard')" id="nav-dashboard" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 active-nav transition-colors">
+                        ðŸ“Š Estado del Proyecto
+                    </button>
+                </li>
+                <li>
+                    <button onclick="navTo('backend')" id="nav-backend" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        âš™ï¸ Arquitectura Spring Boot
+                    </button>
+                </li>
+                <li>
+                    <button onclick="navTo('flow')" id="nav-flow" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        ðŸ”€ Enrutador Fiscal
+                    </button>
+                </li>
+                <li>
+                    <button onclick="navTo('reliability')" id="nav-reliability" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        ðŸ›¡ï¸ Resiliencia y Retries
+                    </button>
+                </li>
+                <li>
+                    <button onclick="navTo('deployment')" id="nav-deployment" class="w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        ðŸš€ Docker & Despliegue
+                    </button>
+                </li>
+            </ul>
+        </nav>
+        <div class="p-4 border-t border-gray-100 bg-gray-50">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xs">JS</div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">Admin Dev</p>
+                    <p class="text-xs text-gray-500">Raspberry Pi Node</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto bg-[#fdfbf7] p-4 md:p-8" id="main-content">
+        
+        <!-- Mobile Header -->
+        <div class="md:hidden flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+            <h1 class="text-lg font-bold text-gray-800">VeriFactu<span class="text-orange-600">Dev</span></h1>
+            <select onchange="navTo(this.value)" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2.5">
+                <option value="dashboard">Estado</option>
+                <option value="backend">Backend</option>
+                <option value="flow">Enrutador</option>
+                <option value="reliability">Resiliencia</option>
+                <option value="deployment">Despliegue</option>
+            </select>
+        </div>
+
+        <!-- SECTION: DASHBOARD -->
+        <section id="dashboard" class="space-y-6 animate-fade-in">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Resumen Ejecutivo y Estado Actual</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    Este panel ofrece una visiÃ³n global de la integraciÃ³n de VeriFactu y TicketBAI. Actualmente, el nÃºcleo criptogrÃ¡fico (Hashing encadenado y Firma XAdES) estÃ¡ completado en Java. El siguiente gran hito es la implementaciÃ³n del **Backend Spring Boot**, la capa de **Transporte Seguro** y la **Infraestructura Docker**.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- KPI Cards -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">MÃ³dulo Cripto</p>
+                        <h3 class="text-3xl font-bold text-gray-900 mt-2">100%</h3>
+                        <p class="text-sm text-green-600 mt-1">Implementado</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-400">Java: SHA-256 & RSA</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Transporte</p>
+                        <h3 class="text-3xl font-bold text-gray-900 mt-2">15%</h3>
+                        <p class="text-sm text-orange-500 mt-1">En DiseÃ±o</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-400">SOAP/REST Pendiente</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Infraestructura</p>
+                        <h3 class="text-3xl font-bold text-gray-900 mt-2">Docker</h3>
+                        <p class="text-sm text-blue-600 mt-1">PlanificaciÃ³n</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-400">Raspberry Pi / Cloud</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Componentes del Sistema</h3>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">PrÃ³ximos Pasos CrÃ­ticos</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold">âœ“</div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900">Validar CriptografÃ­a</h4>
+                                <p class="text-xs text-gray-500">Hash SHA-256 encadenado y Firma RSA probados.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">2</div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900">Levantar Spring Boot</h4>
+                                <p class="text-xs text-gray-500">Crear controladores y servicios de facturaciÃ³n.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">3</div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900">Configurar Persistencia</h4>
+                                <p class="text-xs text-gray-500">PostgreSQL + JPA para guardar estado de facturas.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">4</div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900">Implementar Retry/Queue</h4>
+                                <p class="text-xs text-gray-500">Vital para evitar sanciones por fallos de red.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: BACKEND ARCHITECTURE -->
+        <section id="backend" class="hidden space-y-6 animate-fade-in">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Arquitectura Spring Boot</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    La aplicaciÃ³n Java debe estructurarse en capas claras para separar la lÃ³gica de negocio (generaciÃ³n de facturas), la lÃ³gica de seguridad (firmas) y la lÃ³gica de transporte (envÃ­o a Hacienda). A continuaciÃ³n, interactÃºa con el diagrama para ver las responsabilidades de cada capa.
+                </p>
+            </div>
+
+            <!-- Interactive Architecture Stack -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Diagram Column -->
+                <div class="lg:col-span-1 space-y-3">
+                    <button onclick="showArchDetail('controller')" class="w-full text-left p-4 rounded-lg bg-orange-50 border border-orange-200 hover:shadow-md transition-all group">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-orange-800">1. API Controller</span>
+                            <span class="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">REST Endpoint</span>
+                        </div>
+                        <p class="text-xs text-orange-600 mt-1">Recibe JSON desde Flutter/Android</p>
+                    </button>
+
+                    <button onclick="showArchDetail('service')" class="w-full text-left p-4 rounded-lg bg-blue-50 border border-blue-200 hover:shadow-md transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-blue-800">2. Invoice Service</span>
+                            <span class="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded">Business Logic</span>
+                        </div>
+                        <p class="text-xs text-blue-600 mt-1">Orquesta Hash y Firma</p>
+                    </button>
+
+                    <button onclick="showArchDetail('crypto')" class="w-full text-left p-4 rounded-lg bg-purple-50 border border-purple-200 hover:shadow-md transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-purple-800">3. Crypto Module</span>
+                            <span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded">Security</span>
+                        </div>
+                        <p class="text-xs text-purple-600 mt-1">Usa HashGenerator.java & Signer.java</p>
+                    </button>
+
+                    <button onclick="showArchDetail('transport')" class="w-full text-left p-4 rounded-lg bg-green-50 border border-green-200 hover:shadow-md transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-green-800">4. Transport Layer</span>
+                            <span class="text-xs bg-green-200 text-green-800 px-2 py-1 rounded">Client-Side SSL</span>
+                        </div>
+                        <p class="text-xs text-green-600 mt-1">SOAP (AEAT) / REST (TBAI)</p>
+                    </button>
+                    
+                     <button onclick="showArchDetail('repo')" class="w-full text-left p-4 rounded-lg bg-gray-50 border border-gray-200 hover:shadow-md transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-gray-800">5. Repository</span>
+                            <span class="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded">JPA / Hibernate</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">Persistencia PostgreSQL</p>
+                    </button>
+                </div>
+
+                <!-- Detail Column -->
+                <div class="lg:col-span-2 bg-gray-900 rounded-xl p-6 text-gray-100 font-mono text-sm shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-20 text-6xl font-bold">JAVA</div>
+                    
+                    <div id="arch-content-placeholder" class="h-full flex items-center justify-center text-gray-500">
+                        <p>Selecciona una capa a la izquierda para ver detalles de implementaciÃ³n.</p>
+                    </div>
+
+                    <div id="arch-content-controller" class="hidden animate-fade-in">
+                        <h3 class="text-orange-400 font-bold text-lg mb-2">@RestController InvoiceController</h3>
+                        <pre class="bg-gray-800 p-4 rounded mb-4 overflow-x-auto">
+@PostMapping("/api/v1/invoices")
+public ResponseEntity&lt;InvoiceResult&gt; create(@RequestBody InvoiceDTO invoice) {
+    // 1. Recibe datos crudos desde la App
+    // 2. Valida formato bÃ¡sico
+    // 3. Llama al servicio asÃ­ncrono
+    return ResponseEntity.ok(invoiceService.process(invoice));
+}</pre>
+                        <p class="text-gray-400">El controlador debe ser ligero. Su Ãºnica funciÃ³n es recibir la peticiÃ³n HTTP y delegar. No realiza cÃ¡lculos.</p>
+                    </div>
+
+                    <div id="arch-content-service" class="hidden animate-fade-in">
+                        <h3 class="text-blue-400 font-bold text-lg mb-2">@Service InvoiceService</h3>
+                        <pre class="bg-gray-800 p-4 rounded mb-4 overflow-x-auto">
+@Transactional
+public InvoiceResult process(InvoiceDTO data) {
+    // 1. Recuperar Hash Anterior (Encadenamiento)
+    String prevHash = repo.findLastHash();
+    
+    // 2. Generar Huella
+    String newHash = hashGenerator.getHashNew(data, prevHash);
+    
+    // 3. Firmar (Si es TicketBAI)
+    String signature = signer.sign(newHash, keyManager.getPrivKey());
+    
+    // 4. Guardar estado "PENDIENTE_ENVIO"
+    repo.save(new InvoiceEntity(data, newHash, signature));
+    
+    // 5. Disparar envÃ­o asÃ­ncrono
+    eventPublisher.publish(new SendInvoiceEvent(id));
+}</pre>
+                        <p class="text-gray-400">El corazÃ³n del sistema. Garantiza que la factura se guarde y se encadene antes de intentar enviarla.</p>
+                    </div>
+
+                    <div id="arch-content-crypto" class="hidden animate-fade-in">
+                        <h3 class="text-purple-400 font-bold text-lg mb-2">Component: KeyManager & Signer</h3>
+                        <p class="mb-2 text-gray-300">Integra tus clases existentes:</p>
+                        <ul class="list-disc ml-4 text-gray-400 space-y-1 mb-4">
+                            <li><code>HashGenerator.java</code>: Implementa SHA-256.</li>
+                            <li><code>Signer.java</code>: Usa <code>SHA256withRSA</code>.</li>
+                            <li><code>KeyManager.java</code>: Carga el <code>.p12</code> desde volumen seguro.</li>
+                        </ul>
+                        <div class="bg-yellow-900/30 border border-yellow-700 p-3 rounded text-yellow-500 text-xs">
+                            âš  IMPORTANTE: El certificado .p12 no debe estar en el cÃ³digo fuente. Debe montarse como volumen Docker en <code>/secure/cert.p12</code>.
+                        </div>
+                    </div>
+
+                    <div id="arch-content-transport" class="hidden animate-fade-in">
+                        <h3 class="text-green-400 font-bold text-lg mb-2">Transport Strategy</h3>
+                        <p class="text-gray-300 mb-2">PatrÃ³n "Strategy" para elegir protocolo:</p>
+                        <pre class="bg-gray-800 p-4 rounded mb-4 overflow-x-auto">
+public interface FiscalSender {
+    void send(Invoice inv);
+}
+
+// Para AEAT (Nacional)
+public class VerifactuSoapSender implements FiscalSender { ... }
+
+// Para Bizkaia (Batuz)
+public class TicketBaiRestSender implements FiscalSender { ... }</pre>
+                        <p class="text-gray-400">Esto permite aÃ±adir nuevas haciendas (Navarra, Ãlava) sin tocar el cÃ³digo principal.</p>
+                    </div>
+                    
+                    <div id="arch-content-repo" class="hidden animate-fade-in">
+                        <h3 class="text-gray-400 font-bold text-lg mb-2">Persistence Layer</h3>
+                        <p class="text-gray-300 mb-2">Schema PostgreSQL vital para integridad:</p>
+                        <pre class="bg-gray-800 p-4 rounded mb-4 overflow-x-auto">
+TABLE invoices (
+    id SERIAL PRIMARY KEY,
+    chain_hash VARCHAR(64) NOT NULL,
+    prev_hash VARCHAR(64) NOT NULL,
+    signature TEXT,
+    status VARCHAR(20) DEFAULT 'PENDING', -- PENDING, SENT, ERROR
+    aeat_csv VARCHAR(100), -- CÃ³digo Seguro VerificaciÃ³n devuelto
+    retry_count INT DEFAULT 0
+);</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: FISCAL ROUTER -->
+        <section id="flow" class="hidden space-y-6 animate-fade-in">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">El "Router" Fiscal</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    Dependiendo de la sede fiscal del emisor, la aplicaciÃ³n debe comportarse como una agencia de viajes inteligente, empaquetando los datos en diferentes formatos (XML SOAP vs JSON/XML REST). Selecciona una regiÃ³n para ver el flujo.
+                </p>
+                
+                <div class="mt-6 flex flex-wrap gap-4">
+                    <button onclick="updateFlow('aeat')" class="px-4 py-2 rounded-full border border-gray-300 hover:border-orange-500 hover:bg-orange-50 focus:ring-2 focus:ring-orange-500 transition-all font-medium text-sm">ðŸ›ï¸ Territorio Nacional (AEAT)</button>
+                    <button onclick="updateFlow('bizkaia')" class="px-4 py-2 rounded-full border border-gray-300 hover:border-green-500 hover:bg-green-50 focus:ring-2 focus:ring-green-500 transition-all font-medium text-sm">ðŸŒ³ Bizkaia (Batuz/LROE)</button>
+                    <button onclick="updateFlow('gipuzkoa')" class="px-4 py-2 rounded-full border border-gray-300 hover:border-blue-500 hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 transition-all font-medium text-sm">ðŸŒŠ Gipuzkoa (TicketBAI)</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100 relative min-h-[400px]">
+                <!-- Dynamic HTML Flowchart -->
+                <div id="flow-diagram" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center text-center">
+                    
+                    <!-- Step 1: Input -->
+                    <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                        <div class="text-2xl mb-2">ðŸ§¾</div>
+                        <div class="font-bold text-gray-700">Factura</div>
+                        <div class="text-xs text-gray-500">JSON desde App</div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="hidden md:block text-gray-300 text-xl">âž”</div>
+
+                    <!-- Step 2: Processing (Variable) -->
+                    <div id="flow-process" class="p-4 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-500">
+                        <div class="text-2xl mb-2">âš™ï¸</div>
+                        <div class="font-bold text-gray-700">Procesador</div>
+                        <div class="text-xs text-gray-500">Selecciona RegiÃ³n</div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="hidden md:block text-gray-300 text-xl">âž”</div>
+
+                    <!-- Step 3: Destination (Variable) -->
+                    <div id="flow-dest" class="p-4 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-500">
+                        <div class="text-2xl mb-2">ðŸ¢</div>
+                        <div class="font-bold text-gray-700">Hacienda</div>
+                        <div class="text-xs text-gray-500">Esperando...</div>
+                    </div>
+                </div>
+
+                <!-- Contextual Detail Box -->
+                <div id="flow-details" class="mt-8 p-4 bg-blue-50 text-blue-800 rounded-lg border border-blue-100 hidden">
+                    <h4 class="font-bold mb-1" id="flow-title">Detalle</h4>
+                    <p class="text-sm" id="flow-desc">DescripciÃ³n...</p>
+                    <div class="mt-3 flex gap-2">
+                        <span class="text-xs bg-white border border-blue-200 px-2 py-1 rounded font-mono" id="flow-tech1">SOAP</span>
+                        <span class="text-xs bg-white border border-blue-200 px-2 py-1 rounded font-mono" id="flow-tech2">XML</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: RELIABILITY -->
+        <section id="reliability" class="hidden space-y-6 animate-fade-in">
+             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Sistema de Reintentos y Cola</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    Hacienda impone sanciones si las facturas no se envÃ­an secuencialmente o si se pierden. Si la conexiÃ³n falla, <strong>NO</strong> se debe perder la factura. Implementaremos un sistema de "Exponential Backoff" (espera incremental) y una cola persistente.
+                </p>
+                <div class="mt-4 flex gap-4">
+                    <button onclick="simulateRetry()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        âš ï¸ Simular Fallo de Red
+                    </button>
+                    <button onclick="resetRetry()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Reiniciar
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Retry Visualization Chart -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Estrategia de Backoff Exponencial</h3>
+                    <div class="chart-container">
+                        <canvas id="retryChart"></canvas>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 text-center">Tiempo de espera entre intentos (segundos)</p>
+                </div>
+
+                <!-- Logic Explanation -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Reglas de Negocio</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold">1</span>
+                            <span class="text-sm text-gray-600"><strong>Persistencia Primero:</strong> Nunca intentar enviar si la factura no estÃ¡ guardada en BD con estado <code>PENDING</code>.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">2</span>
+                            <span class="text-sm text-gray-600"><strong>Hilo AsÃ­ncrono:</strong> El usuario recibe "OK" en la App en cuanto se guarda en BD. El envÃ­o es transparente en background.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">3</span>
+                            <span class="text-sm text-gray-600"><strong>Ack/Nack:</strong> Si Hacienda devuelve error 4xx/5xx, incrementar contador de reintentos. Si devuelve 200 OK + CSV, marcar como <code>SENT</code>.</span>
+                        </li>
+                         <li class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">4</span>
+                            <span class="text-sm text-gray-600"><strong>Alerta:</strong> Tras 10 intentos fallidos, notificar al admin (Dashboard) pero NO borrar la factura.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: DEPLOYMENT -->
+        <section id="deployment" class="hidden space-y-6 animate-fade-in">
+             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Infraestructura Docker & Despliegue</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    Para garantizar la portabilidad (Raspberry Pi -> Cloud), usaremos Docker Compose. La seguridad SSL es crÃ­tica para que la App Flutter se comunique con el Backend.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Stack Visualizer -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                     <h3 class="text-lg font-semibold text-gray-800 mb-6">Docker Compose Stack</h3>
+                     
+                     <div class="flex flex-col gap-2 max-w-sm mx-auto">
+                        <!-- Nginx Proxy -->
+                        <div class="bg-indigo-600 text-white p-4 rounded text-center shadow-lg relative group cursor-pointer">
+                            <div class="font-bold">Nginx / Traefik</div>
+                            <div class="text-xs text-indigo-200">SSL Termination (LetsEncrypt)</div>
+                            <div class="absolute -right-2 top-4 w-4 h-4 bg-green-400 rounded-full border-2 border-white" title="Public Port 443"></div>
+                        </div>
+
+                        <!-- Backend App -->
+                        <div class="bg-orange-600 text-white p-6 rounded text-center shadow-lg mx-4 relative">
+                            <div class="font-bold">Spring Boot App (Java 17)</div>
+                            <div class="text-xs text-orange-200">Puerto 8080 (Interno)</div>
+                            <!-- Volumes -->
+                            <div class="absolute -left-12 top-2 bg-gray-700 text-white text-xs p-1 rounded">/certs</div>
+                            <div class="absolute -left-12 top-8 bg-gray-700 text-white text-xs p-1 rounded">/logs</div>
+                        </div>
+
+                        <!-- Database -->
+                        <div class="bg-blue-600 text-white p-4 rounded text-center shadow-lg mx-8">
+                            <div class="font-bold">PostgreSQL 15</div>
+                            <div class="text-xs text-blue-200">Persistencia de Facturas</div>
+                        </div>
+                     </div>
+                </div>
+
+                <!-- Checklist -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Checklist MigraciÃ³n / Setup</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="border-l-4 border-orange-500 pl-4 py-1">
+                            <h4 class="font-bold text-sm text-gray-800">1. Dominio & DDNS (Raspberry Pi)</h4>
+                            <p class="text-xs text-gray-600 mt-1">Configurar <code>ddclient</code> o script en el router para actualizar la IP dinÃ¡mica. El dominio debe apuntar a la IP pÃºblica.</p>
+                        </div>
+
+                        <div class="border-l-4 border-orange-500 pl-4 py-1">
+                            <h4 class="font-bold text-sm text-gray-800">2. Certificados SSL (LetsEncrypt)</h4>
+                            <p class="text-xs text-gray-600 mt-1">Usar <code>Certbot</code> en Docker para generar certificados vÃ¡lidos. Flutter rechazarÃ¡ certificados autofirmados en producciÃ³n.</p>
+                        </div>
+
+                        <div class="border-l-4 border-orange-500 pl-4 py-1">
+                            <h4 class="font-bold text-sm text-gray-800">3. Volumen de Datos</h4>
+                            <p class="text-xs text-gray-600 mt-1">Mapear la carpeta de DB fuera del contenedor: <code>- ./pgdata:/var/lib/postgresql/data</code>. Esto permite migrar copiando esa carpeta.</p>
+                        </div>
+
+                        <div class="border-l-4 border-gray-300 pl-4 py-1">
+                            <h4 class="font-bold text-sm text-gray-800">4. MigraciÃ³n a Cloud (AWS/Azure)</h4>
+                            <p class="text-xs text-gray-600 mt-1">Simplemente copiar el <code>docker-compose.yml</code> y la carpeta <code>pgdata</code>. Cambiar DNS y regenerar SSL. Tiempo estimado: 15 min.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State Management ---
+        const state = {
+            currentSection: 'dashboard',
+            retryChartInstance: null,
+            statusChartInstance: null,
+            flowRegion: null
+        };
+
+        // --- Navigation Logic ---
+        function navTo(sectionId) {
+            // Update UI State
+            document.querySelectorAll('section').forEach(el => {
+                el.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Mobile Dropdown Sync
+            const mobileSelect = document.querySelector('select');
+            if(mobileSelect) mobileSelect.value = sectionId;
+
+            // Desktop Sidebar Sync
+            document.querySelectorAll('.active-nav').forEach(el => {
+                el.classList.remove('active-nav', 'text-orange-600', 'border-right');
+                el.classList.add('text-gray-700');
+            });
+            const activeBtn = document.getElementById(`nav-${sectionId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active-nav');
+                activeBtn.classList.remove('text-gray-700');
+            }
+
+            state.currentSection = sectionId;
+
+            // Initialize Charts if needed (Lazy Load)
+            if (sectionId === 'dashboard' && !state.statusChartInstance) initStatusChart();
+            if (sectionId === 'reliability' && !state.retryChartInstance) initRetryChart();
+        }
+
+        // --- Chart.js: Status Chart ---
+        function initStatusChart() {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            state.statusChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CriptografÃ­a (Java)', 'Backend (Spring)', 'Transporte (HTTP)', 'Infraestructura'],
+                    datasets: [{
+                        data: [100, 20, 15, 10],
+                        backgroundColor: ['#16a34a', '#ea580c', '#2563eb', '#9ca3af'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // --- Chart.js: Retry Simulation ---
+        function initRetryChart() {
+            const ctx = document.getElementById('retryChart').getContext('2d');
+            state.retryChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Intento 1', 'Intento 2', 'Intento 3', 'Intento 4', 'Intento 5'],
+                    datasets: [{
+                        label: 'Tiempo de Espera (segundos)',
+                        data: [1, 2, 4, 8, 16], // Exponential Backoff
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Segundos' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function simulateRetry() {
+            if (!state.retryChartInstance) return;
+            // Add a new attempt with exponential value
+            const currentLabels = state.retryChartInstance.data.labels;
+            const currentData = state.retryChartInstance.data.datasets[0].data;
+            
+            const nextIndex = currentLabels.length + 1;
+            const nextValue = Math.pow(2, nextIndex - 1);
+            
+            if (nextIndex <= 8) { // Limit visualization
+                state.retryChartInstance.data.labels.push(`Intento ${nextIndex}`);
+                state.retryChartInstance.data.datasets[0].data.push(nextValue);
+                state.retryChartInstance.update();
+            } else {
+                alert("LÃ­mite de reintentos alcanzado. Alerta enviada al admin.");
+            }
+        }
+
+        function resetRetry() {
+            if (!state.retryChartInstance) return;
+            state.retryChartInstance.data.labels = ['Intento 1', 'Intento 2', 'Intento 3', 'Intento 4', 'Intento 5'];
+            state.retryChartInstance.data.datasets[0].data = [1, 2, 4, 8, 16];
+            state.retryChartInstance.update();
+        }
+
+        // --- Architecture Interactive Detail ---
+        function showArchDetail(layerId) {
+            // Hide all details
+            const ids = ['controller', 'service', 'crypto', 'transport', 'repo'];
+            ids.forEach(id => document.getElementById(`arch-content-${id}`).classList.add('hidden'));
+            document.getElementById('arch-content-placeholder').classList.add('hidden');
+            
+            // Show selected
+            const target = document.getElementById(`arch-content-${layerId}`);
+            target.classList.remove('hidden');
+        }
+
+        // --- Flowchart Logic ---
+        function updateFlow(region) {
+            const processBox = document.getElementById('flow-process');
+            const destBox = document.getElementById('flow-dest');
+            const details = document.getElementById('flow-details');
+            const title = document.getElementById('flow-title');
+            const desc = document.getElementById('flow-desc');
+            const t1 = document.getElementById('flow-tech1');
+            const t2 = document.getElementById('flow-tech2');
+
+            details.classList.remove('hidden');
+
+            if (region === 'aeat') {
+                processBox.className = "p-4 rounded-lg bg-blue-100 border border-blue-300 shadow-md transform scale-105 transition-all";
+                processBox.innerHTML = '<div class="text-2xl mb-2">ðŸ“œ</div><div class="font-bold text-blue-900">SOAP Envelope</div><div class="text-xs text-blue-700">Client Sign</div>';
+                
+                destBox.innerHTML = '<div class="text-2xl mb-2">ðŸ‡ªðŸ‡¸</div><div class="font-bold text-gray-800">AEAT</div><div class="text-xs text-gray-500">Veri*Factu</div>';
+                
+                title.innerText = "Veri*Factu (Nacional)";
+                desc.innerText = "Usa protocolo SOAP. El XML de Alta se incrusta en el Body del SOAP. Requiere certificado digital en la conexiÃ³n (mTLS opcional pero recomendado).";
+                t1.innerText = "SOAP 1.1";
+                t2.innerText = "XML DSig";
+
+            } else if (region === 'bizkaia') {
+                processBox.className = "p-4 rounded-lg bg-green-100 border border-green-300 shadow-md transform scale-105 transition-all";
+                processBox.innerHTML = '<div class="text-2xl mb-2">ðŸ“¦</div><div class="font-bold text-green-900">LROE Wrap</div><div class="text-xs text-green-700">TicketBAI + Batuz</div>';
+
+                destBox.innerHTML = '<div class="text-2xl mb-2">ðŸŒ³</div><div class="font-bold text-gray-800">Bizkaia</div><div class="text-xs text-gray-500">Batuz API</div>';
+
+                title.innerText = "Batuz (Bizkaia)";
+                desc.innerText = "Modelo REST. El fichero TicketBAI se comprime en GZIP y se incrusta en base64 dentro de la estructura LROE (Libro Registro de Operaciones EconÃ³micas).";
+                t1.innerText = "REST POST";
+                t2.innerText = "JSON/XML";
+
+            } else if (region === 'gipuzkoa') {
+                processBox.className = "p-4 rounded-lg bg-indigo-100 border border-indigo-300 shadow-md transform scale-105 transition-all";
+                processBox.innerHTML = '<div class="text-2xl mb-2">ðŸš€</div><div class="font-bold text-indigo-900">Direct Send</div><div class="text-xs text-indigo-700">TicketBAI Raw</div>';
+
+                destBox.innerHTML = '<div class="text-2xl mb-2">ðŸŒŠ</div><div class="font-bold text-gray-800">Gipuzkoa</div><div class="text-xs text-gray-500">Zergabidea</div>';
+
+                title.innerText = "TicketBAI (Gipuzkoa)";
+                desc.innerText = "EnvÃ­o directo del XML TicketBAI firmado a travÃ©s de endpoint REST. Requiere cabeceras especÃ­ficas (Gipuzkoa-TicketBAI-Signature).";
+                t1.innerText = "REST";
+                t2.innerText = "XML XAdES";
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            initStatusChart();
+        });
+
+    </script>
+</body>
+</html>

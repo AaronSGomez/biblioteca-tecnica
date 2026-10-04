@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odoo Dockerizado GUIA</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../css/paginas.css">
+</head>
+<body>
+
+<div class="document-page">
+
+    <h1>Proyecto: MigraciÃ³n de ERP a Microservicios</h1>
+    <p>
+        <span class="badge">Docker Compose</span>
+        <span class="badge">Apache Reverse Proxy</span>
+        <span class="badge">SSL/TLS</span>
+        <span class="badge">Raspberry Pi Server</span>
+    </p>
+
+    <div class="note">
+        <strong>Resumen TÃ©cnico:</strong> DocumentaciÃ³n de la implementaciÃ³n de Odoo ERP mediante arquitectura de contenedores, incluyendo persistencia de datos y seguridad SSL automatizada.
+    </div>
+
+    <h2>1. Arquitectura LÃ³gica</h2>
+    <p>El sistema desacopla la base de datos de la aplicaciÃ³n mediante una red interna de Docker, exponiendo solo el puerto seguro a internet a travÃ©s de Apache.</p>
+    
+    <div class="mermaid">
+    graph LR
+        User((Usuario Remoto)) -- HTTPS/443 --> Apache[Apache Proxy Inverso]
+        subgraph "Servidor Host - Docker Network"
+            Apache -- Port 8069 --> Odoo[Contenedor Odoo Web]
+            Odoo -- Port 5432 --> DB[(Contenedor PostgreSQL)]
+        end
+        style Apache fill:#ffecb3,stroke:#fbc02d,stroke-width:2px
+        style Odoo fill:#e1bee7,stroke:#714b67,stroke-width:2px
+        style DB fill:#b3e5fc,stroke:#0277bd,stroke-width:2px
+    </div>
+
+    <h2>2. Infraestructura como CÃ³digo (Docker Compose)</h2>
+    <p>DefiniciÃ³n del stack de servicios. Se utilizan volÃºmenes nombrados para garantizar que los datos no se pierdan al reiniciar los contenedores.</p>
+    
+    <div class="file-header">ðŸ“„ docker-compose.yml</div>
+    <div class="file-content">version: '3.1'
+
+services:
+  web:
+    image: odoo:16.0
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+    environment:
+      - HOST=db
+      - USER=odoo 
+      - PASSWORD=tu_contrasena_segura  # Cambiar en producciÃ³n
+    restart: always
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=tu_contrasena_segura # Debe coincidir con la de Odoo
+      - POSTGRES_USER=odoo
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  odoo-web-data:
+  odoo-db-data:</div>
+
+    <h2>3. Comandos de Despliegue y Arranque</h2>
+    <p>Pasos ejecutados en la terminal del servidor para levantar la infraestructura.</p>
+
+    <div class="terminal">
+        <span class="comment"># 1. Crear directorio de trabajo</span>
+        <div class="cmd">mkdir -p ~/docker-apps/odoo</div>
+        <div class="cmd">cd ~/docker-apps/odoo</div>
+
+        <span class="comment"># 2. Crear y editar el fichero de configuraciÃ³n (pegar contenido de arriba)</span>
+        <span class="comment"># Nota: TambiÃ©n puedes crearlo desde VS Code y usar la terminal integrada</span>
+        <div class="cmd">nano docker-compose.yml</div>
+        
+        <span class="comment"># 3. Arrancar los contenedores en segundo plano (Detached)</span>
+        <div class="cmd">docker compose up -d</div>
+
+        <span class="comment"># 4. Verificar estado y logs</span>
+        <div class="cmd">docker compose ps</div>
+        <div class="cmd">docker compose logs -f</div>
+    </div>
+
+    <h2>4. ConfiguraciÃ³n del Proxy Inverso</h2>
+    <p>Apache gestiona la redirecciÃ³n del subdominio hacia el puerto local de Docker.</p>
+
+    <div class="file-header">ðŸ“„ /etc/apache2/sites-available/odoo-docker.conf</div>
+    <div class="file-content">&lt;VirtualHost *:80&gt;
+    ServerName miproyecto-erp.duckdns.org
+
+    # Logs
+    ErrorLog ${APACHE_LOG_DIR}/odoo-error.log
+    CustomLog ${APACHE_LOG_DIR}/odoo-access.log combined
+
+    # Proxy hacia Docker
+    ProxyPreserveHost On
+    ProxyRequests Off
+    ProxyPass / http://localhost:8069/
+    ProxyPassReverse / http://localhost:8069/
+    
+    RequestHeader set "X-Forwarded-Proto" "https"
+&lt;/VirtualHost&gt;</div>
+
+    <h2>5. AutomatizaciÃ³n SSL (Certbot)</h2>
+    <p>Comando final para asegurar la conexiÃ³n y generar certificados.</p>
+    
+    <div class="terminal">
+        <span class="comment"># Generar certificado y configurar redirecciÃ³n HTTPS automÃ¡tica</span>
+        <span class="comment"># Importante: El dominio (-d) debe coincidir con tu ServerName</span>
+        <div class="cmd">sudo certbot --apache -d miproyecto-erp.duckdns.org</div>
+        
+        <span class="comment"># Reiniciar Apache para aplicar cambios</span>
+        <div class="cmd">sudo systemctl reload apache2</div>
+    </div>
+
+    <h2>6. VerificaciÃ³n Final</h2>
+    <ul>
+        <li>âœ… <strong>Persistencia:</strong> Datos de BD seguros en volÃºmenes Docker.</li>
+        <li>âœ… <strong>Alta Disponibilidad:</strong> <code>restart: always</code> configurado.</li>
+        <li>âœ… <strong>Seguridad:</strong> HTTPS forzado y aislamiento de red.</li>
+    </ul>
+
+    <div class="footer">
+        DocumentaciÃ³n TÃ©cnica - Generada para Portfolio Personal
+    </div>
+
+</div>
+
+<script>
+    // Inicializar Mermaid con tema claro/neutro para encajar con la guÃ­a
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'neutral',
+        flowchart: { curve: 'basis' }
+    });
+</script>
+
+</body>
+</html>

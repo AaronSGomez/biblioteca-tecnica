@@ -1,0 +1,520 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifactu INFO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px; 
+            max-height: 400px; 
+        } 
+        @media (min-width: 768px) { 
+            .chart-container { height: 350px; } 
+        }
+        .bureaucratic-shadow {
+            box-shadow: 4px 4px 0px 0px #cbd5e1;
+        }
+        .active-tab {
+            background-color: #1e3a8a;
+            color: white;
+            border-bottom: 4px solid #f59e0b;
+        }
+        .inactive-tab {
+            background-color: white;
+            color: #4b5563;
+            border-bottom: 4px solid transparent;
+        }
+        .inactive-tab:hover {
+            background-color: #f1f5f9;
+        }
+    </style>
+    <!-- Chosen Palette: Bureaucratic Blue & Warning Amber - Representing the official, strict nature of tax administration mixed with the caution required for technical implementation. -->
+    <!-- Application Structure Plan:
+        1.  **Header & Metaphor:** Introduces the "Certified Letter" analogy using a visual representation of strictness.
+        2.  **The Challenge (Dashboard):** A dashboard view comparing the "Native Flutter" difficulty vs. "Backend Middleware". Uses charts to visualize complexity.
+        3.  **Library Navigator (The Solution):** An interactive section to explore the researched Dart libraries (XML, Crypto, HTTP) required for a native implementation, fulfilling the user's research request.
+        4.  **Service Map (Technical Specs):** A flowchart/list interaction detailing the specific Verifactu SOAP services (`RegFactu`, etc.).
+        5.  **Simulator:** A simple interactive "Envelope Validator" game to reinforce the concept of SOAP header strictness.
+    -->
+    <!-- Visualization & Content Choices:
+        - **Goal: Inform (Strictness):** Used a "Complexity Gauge" (Doughnut Chart) to visualize the high overhead of SOAP Headers vs Body.
+        - **Goal: Compare (Strategies):** Bar chart comparing "Development Time" vs "Maintenance" for Native vs Middleware approaches.
+        - **Goal: Organize (Libraries):** A toggle-card layout for Dart libraries (`xml`, `pointycastle`, etc.) to allow focused reading of technical details without clutter.
+        - **Goal: Process (Services):** A step-by-step interactive list for the SOAP operations (Alta, AnulaciÃ³n) to show the workflow.
+        - **NO SVG/Mermaid:** All icons are Unicode or CSS shapes. Charts are Chart.js.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">ðŸ›ï¸</span>
+                    <span class="font-bold text-xl tracking-tight">VeriFactu Technical Guide</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <button onclick="navigate('dashboard')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition" data-target="dashboard">Dashboard</button>
+                        <button onclick="navigate('libraries')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition" data-target="libraries">LibrerÃ­as Dart</button>
+                        <button onclick="navigate('services')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition" data-target="services">Servicios SOAP</button>
+                        <button onclick="navigate('simulation')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition" data-target="simulation">Simulador</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Introduction Section -->
+        <section class="bg-white rounded-lg p-6 bureaucratic-shadow border border-slate-200">
+            <h1 class="text-3xl font-bold text-slate-900 mb-4">El Reto del "Sobre Perfecto"</h1>
+            <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                Implementar VeriFactu no es solo enviar datos; es un ejercicio de precisiÃ³n burocrÃ¡tica. 
+                Imagine enviar una carta certificada donde el sobre (Header SOAP) es mÃ¡s importante que la carta misma (Body). 
+                Un error milimÃ©trico en la firma digital o la estructura XML, y el servidor rechaza todo el envÃ­o sin siquiera leer el contenido.
+                Esta guÃ­a interactiva desglosa la complejidad tÃ©cnica para entornos Flutter y presenta las soluciones investigadas.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="bg-slate-50 p-4 rounded border border-slate-200">
+                    <div class="text-3xl mb-2">ðŸ“¨</div>
+                    <h3 class="font-semibold text-slate-700">Protocolo</h3>
+                    <p class="text-sm text-slate-500">SOAP 1.1 / 1.2 Estricto</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded border border-slate-200">
+                    <div class="text-3xl mb-2">ðŸ”</div>
+                    <h3 class="font-semibold text-slate-700">Seguridad</h3>
+                    <p class="text-sm text-slate-500">Firma WS-Security (X.509)</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded border border-slate-200">
+                    <div class="text-3xl mb-2">ðŸ“±</div>
+                    <h3 class="font-semibold text-slate-700">DesafÃ­o Flutter</h3>
+                    <p class="text-sm text-slate-500">Ausencia de soporte nativo SOAP</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Dashboard (Comparison & Strategy) -->
+        <div id="dashboard" class="view-section space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Complexity Analysis -->
+                <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">AnatomÃ­a del Problema SOAP</h2>
+                    <p class="text-sm text-slate-600 mb-4">
+                        Desglose del esfuerzo de desarrollo en una implementaciÃ³n nativa. Observe cÃ³mo la construcciÃ³n del "Sobre" (Header/Seguridad) consume la mayorÃ­a de recursos frente a la lÃ³gica de negocio real.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="complexityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Strategy Comparison -->
+                <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">Estrategia: Nativo vs. Intermediario</h2>
+                    <p class="text-sm text-slate-600 mb-4">
+                        Comparativa entre implementar toda la pila SOAP en Dart (Flutter) o utilizar un Backend intermedio (Python/Node/Java) que gestione la firma.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="strategyChart"></canvas>
+                    </div>
+                    <div class="mt-4 p-4 bg-amber-50 border-l-4 border-amber-500 text-amber-800 text-sm">
+                        <strong>RecomendaciÃ³n:</strong> El servidor intermedio reduce drÃ¡sticamente el riesgo de errores de firma en dispositivos fragmentados (tablets Windows/Android).
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Libraries (The Solution) -->
+        <div id="libraries" class="view-section hidden space-y-8">
+            <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Arsenal Dart para VeriFactu</h2>
+                <p class="text-slate-600 mb-6">
+                    InvestigaciÃ³n de librerÃ­as Dart compatibles con Windows y MÃ³vil para una implementaciÃ³n pura ("Hard Mode"). 
+                    Estas son las herramientas necesarias para construir el XML y firmarlo manualmente.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <button onclick="showLibDetails('xml')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition active-lib" data-lib="xml">
+                        <div class="font-bold text-blue-800">1. Estructura XML</div>
+                        <div class="text-xs text-slate-500 mt-1">Paquete: `xml`</div>
+                    </button>
+                    <button onclick="showLibDetails('crypto')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition" data-lib="crypto">
+                        <div class="font-bold text-blue-800">2. CriptografÃ­a</div>
+                        <div class="text-xs text-slate-500 mt-1">Paquete: `pointycastle`</div>
+                    </button>
+                    <button onclick="showLibDetails('transport')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition" data-lib="transport">
+                        <div class="font-bold text-blue-800">3. Transporte</div>
+                        <div class="text-xs text-slate-500 mt-1">Paquete: `http` / `dio`</div>
+                    </button>
+                    <button onclick="showLibDetails('utils')" class="lib-btn p-4 text-left border rounded hover:border-blue-500 hover:bg-blue-50 transition" data-lib="utils">
+                        <div class="font-bold text-blue-800">4. Utilidades</div>
+                        <div class="text-xs text-slate-500 mt-1">Paquete: `archive`</div>
+                    </button>
+                </div>
+
+                <div id="lib-content-area" class="bg-slate-50 p-6 rounded border border-slate-200 min-h-[200px]">
+                    <!-- Dynamic Content populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Services (Technical Specs) -->
+        <div id="services" class="view-section hidden space-y-8">
+            <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Servicios Web Definidos</h2>
+                <p class="text-slate-600 mb-6">
+                    Para un TPV, estos son los endpoints y operaciones crÃ­ticas que deben implementarse. 
+                    El sistema distingue entre el entorno de pruebas y producciÃ³n.
+                </p>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-left text-sm whitespace-nowrap">
+                        <thead class="uppercase tracking-wider border-b-2 border-slate-200 bg-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-slate-600 font-bold">Servicio (WSDL)</th>
+                                <th scope="col" class="px-6 py-4 text-slate-600 font-bold">OperaciÃ³n</th>
+                                <th scope="col" class="px-6 py-4 text-slate-600 font-bold">FunciÃ³n TPV</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium">
+                            <tr class="hover:bg-blue-50 transition">
+                                <td class="px-6 py-4 text-indigo-700">SuministroFacturas</td>
+                                <td class="px-6 py-4">AltaFactu</td>
+                                <td class="px-6 py-4 text-slate-600">EnvÃ­o de registros de facturaciÃ³n (Ventas).</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50 transition">
+                                <td class="px-6 py-4 text-indigo-700">SuministroFacturas</td>
+                                <td class="px-6 py-4">AnulacionFactu</td>
+                                <td class="px-6 py-4 text-slate-600">CorrecciÃ³n o anulaciÃ³n de registros previos.</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50 transition">
+                                <td class="px-6 py-4 text-indigo-700">Consultas</td>
+                                <td class="px-6 py-4">ConsultaLRFacturas</td>
+                                <td class="px-6 py-4 text-slate-600">Verificar estado de facturas enviadas.</td>
+                            </tr>
+                             <tr class="hover:bg-blue-50 transition">
+                                <td class="px-6 py-4 text-indigo-700">Verificacion</td>
+                                <td class="px-6 py-4">Veri*Factu</td>
+                                <td class="px-6 py-4 text-slate-600">ComprobaciÃ³n de integridad y encadenamiento.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 bg-blue-50 p-4 rounded-md border border-blue-100">
+                    <h4 class="font-bold text-blue-900 mb-2">ðŸ” Detalle de Seguridad</h4>
+                    <p class="text-sm text-blue-800">
+                        Cada peticiÃ³n debe incluir un encabezado <strong>WS-Security</strong> firmado con el certificado digital del emisor. 
+                        El huella digital (Checksum) de la factura anterior debe incluirse en la actual para garantizar el encadenamiento inalterable.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Simulation (Interactive Strictness) -->
+        <div id="simulation" class="view-section hidden space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">Simulador de "Sobre" SOAP</h2>
+                    <p class="text-sm text-slate-600 mb-6">
+                        Intente generar un Header SOAP vÃ¡lido. El sistema VeriFactu rechazarÃ¡ cualquier desviaciÃ³n del formato estricto.
+                        <br><i>Haga clic en los componentes para ensamblarlos.</i>
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-2 mb-6" id="soap-components">
+                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="<soap:Header>">&lt;Header&gt;</button>
+                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="<wsse:Security>">&lt;Security&gt;</button>
+                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="<ds:Signature>">&lt;Signature&gt;</button>
+                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="</wsse:Security>">&lt;/Security&gt;</button>
+                        <button class="comp-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs font-mono transition" data-val="</soap:Header>">&lt;/Header&gt;</button>
+                    </div>
+
+                    <div class="bg-slate-900 text-green-400 p-4 rounded font-mono text-xs min-h-[150px] mb-4 overflow-auto" id="soap-editor">
+                        <!-- Code appears here -->
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <button onclick="resetSim()" class="text-xs text-red-500 hover:underline">Reiniciar</button>
+                        <button onclick="validateSoap()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-bold">Enviar a VeriFactu</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200 flex flex-col justify-center items-center text-center" id="validation-result">
+                    <div class="text-6xl mb-4 text-gray-300">ðŸ“¬</div>
+                    <h3 class="text-xl font-bold text-gray-400">Esperando envÃ­o...</h3>
+                    <p class="text-sm text-gray-400 mt-2">Configure el encabezado correctamente.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+            <p>Â© 2024 GuÃ­a de ImplementaciÃ³n TÃ©cnica VeriFactu.</p>
+            <p class="mt-2 text-xs">Basado en requisitos de la AEAT (Agencia Tributaria EspaÃ±ola).</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            currentTab: 'dashboard',
+            currentLib: 'xml',
+            soapBuffer: []
+        };
+
+        // --- Data Sources (Content) ---
+        const libDetails = {
+            xml: {
+                title: "Paquete `xml`",
+                desc: "Esencial para construir el cuerpo y el encabezado del mensaje SOAP. Flutter no tiene un serializador SOAP nativo, por lo que debes construir el Ã¡rbol DOM XML manualmente.",
+                code: "dependencies:\n  xml: ^6.5.0\n\n// Uso:\nfinal builder = XmlBuilder();\nbuilder.element('soap:Envelope', nest: () { ... });",
+                pros: "Control total, Puro Dart (Windows/iOS/Android).",
+                cons: "Verborreico, propenso a errores humanos."
+            },
+            crypto: {
+                title: "Paquete `pointycastle` / `encrypt`",
+                desc: "El corazÃ³n de la dificultad. Necesario para firmar el XML (XML-DSIG). Debes calcular el hash SHA-256 del body, canonizarlo y firmarlo con la clave privada del certificado .p12.",
+                code: "dependencies:\n  pointycastle: ^3.7.0\n  encrypt: ^5.0.0\n\n// Nota: Requiere implementaciÃ³n manual de algoritmos de canonizaciÃ³n (C14N).",
+                pros: "EstÃ¡ndar en Dart para criptografÃ­a.",
+                cons: "Curva de aprendizaje muy alta. Implementar XML-DSIG desde cero es complejo."
+            },
+            transport: {
+                title: "Paquete `http` / `dio`",
+                desc: "Se encarga de enviar la cadena XML finalizada mediante POST. Debe manejar certificados SSL/TLS si el servidor lo requiere, y configurar los headers HTTP (Content-Type: text/xml).",
+                code: "dependencies:\n  http: ^1.1.0\n\n// Header CrÃ­tico:\n{'Content-Type': 'text/xml; charset=utf-8',\n 'SOAPAction': '...'}",
+                pros: "FÃ¡cil de usar, robusto.",
+                cons: "Ninguno, es la parte fÃ¡cil."
+            },
+            utils: {
+                title: "Manejo de Certificados",
+                desc: "Para leer archivos .p12 (PKCS#12) en la tablet o Windows, necesitas acceder al sistema de archivos y parsear los binarios del certificado para extraer la clave privada.",
+                code: "dependencies:\n  pkcs7: ^0.4.0 (Experimental)\n\n// Estrategia:\n// Convertir .p12 a PEM previamente si es posible para facilitar la lectura en Dart.",
+                pros: "Independencia del OS.",
+                cons: "GestiÃ³n de claves segura en memoria es delicada."
+            }
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            renderLibDetail('xml');
+            setupNav();
+            setupSim();
+        });
+
+        // --- Navigation Logic ---
+        function navigate(targetId) {
+            // Hide all sections
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            // Show target
+            document.getElementById(targetId).classList.remove('hidden');
+            
+            // Update buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.target === targetId) {
+                    btn.classList.add('bg-slate-700', 'text-white');
+                    btn.classList.remove('text-slate-300');
+                } else {
+                    btn.classList.remove('bg-slate-700', 'text-white');
+                    btn.classList.add('text-slate-300');
+                }
+            });
+            state.currentTab = targetId;
+        }
+
+        function setupNav() {
+            // Initial state
+            navigate('dashboard');
+        }
+
+        // --- Library Explorer Logic ---
+        function showLibDetails(libKey) {
+            state.currentLib = libKey;
+            
+            // Update UI styles
+            document.querySelectorAll('.lib-btn').forEach(btn => {
+                if(btn.dataset.lib === libKey) {
+                    btn.classList.add('bg-blue-50', 'border-blue-500');
+                    btn.classList.remove('border-transparent');
+                } else {
+                    btn.classList.remove('bg-blue-50', 'border-blue-500');
+                    btn.classList.add('border-transparent');
+                }
+            });
+
+            renderLibDetail(libKey);
+        }
+
+        function renderLibDetail(key) {
+            const data = libDetails[key];
+            const container = document.getElementById('lib-content-area');
+            container.innerHTML = `
+                <h3 class="text-xl font-bold text-slate-800 mb-2">${data.title}</h3>
+                <p class="text-slate-700 mb-4">${data.desc}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="bg-green-50 p-3 rounded border border-green-200">
+                        <span class="font-bold text-green-800">Ventaja:</span> <span class="text-green-700 text-sm">${data.pros}</span>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded border border-red-200">
+                        <span class="font-bold text-red-800">Dificultad:</span> <span class="text-red-700 text-sm">${data.cons}</span>
+                    </div>
+                </div>
+                <div class="bg-slate-800 text-slate-200 p-4 rounded font-mono text-sm overflow-x-auto">
+                    <pre>${data.code}</pre>
+                </div>
+            `;
+        }
+
+        // --- Chart.js Implementations ---
+        function initCharts() {
+            // Chart 1: Complexity (Doughnut)
+            const ctx1 = document.getElementById('complexityChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ConstrucciÃ³n Header (Seguridad/Firma)', 'LÃ³gica de Negocio (Datos Factura)', 'Transporte HTTP'],
+                    datasets: [{
+                        data: [65, 25, 10],
+                        backgroundColor: ['#b91c1c', '#3b82f6', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.raw + '% esfuerzo';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Strategy Comparison (Bar)
+            const ctx2 = document.getElementById('strategyChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Desarrollo Inicial', 'Complejidad Mantenimiento', 'Riesgo de Errores'],
+                    datasets: [
+                        {
+                            label: 'Nativo (Solo Dart)',
+                            data: [90, 80, 85],
+                            backgroundColor: '#ef4444'
+                        },
+                        {
+                            label: 'Con Backend Intermedio',
+                            data: [40, 30, 20],
+                            backgroundColor: '#22c55e'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Nivel de Impacto (%)' } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // --- Simulation Logic ---
+        function setupSim() {
+            const buttons = document.querySelectorAll('.comp-btn');
+            const editor = document.getElementById('soap-editor');
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const val = btn.dataset.val;
+                    state.soapBuffer.push(val);
+                    renderEditor();
+                });
+            });
+        }
+
+        function renderEditor() {
+            const editor = document.getElementById('soap-editor');
+            if(state.soapBuffer.length === 0) {
+                editor.innerHTML = '<span class="text-gray-500">// Seleccione componentes arriba</span>';
+                return;
+            }
+            // Simple indentation simulation
+            let html = '';
+            let indent = 0;
+            state.soapBuffer.forEach(tag => {
+                if(tag.startsWith('</')) indent = Math.max(0, indent - 1);
+                html += '&nbsp;&nbsp;'.repeat(indent) + escapeHtml(tag) + '<br>';
+                if(!tag.startsWith('</') && !tag.endsWith('/>')) indent++;
+            });
+            editor.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function resetSim() {
+            state.soapBuffer = [];
+            renderEditor();
+            document.getElementById('validation-result').innerHTML = `
+                <div class="text-6xl mb-4 text-gray-300">ðŸ“¬</div>
+                <h3 class="text-xl font-bold text-gray-400">Esperando envÃ­o...</h3>
+                <p class="text-sm text-gray-400 mt-2">Configure el encabezado correctamente.</p>
+            `;
+            document.getElementById('validation-result').className = "bg-white p-6 rounded-lg bureaucratic-shadow border border-slate-200 flex flex-col justify-center items-center text-center";
+        }
+
+        function validateSoap() {
+            const correctSequence = ["<soap:Header>", "<wsse:Security>", "<ds:Signature>", "</wsse:Security>", "</soap:Header>"];
+            const current = state.soapBuffer;
+            const resDiv = document.getElementById('validation-result');
+
+            // Check specific strict order
+            const isCorrect = JSON.stringify(current) === JSON.stringify(correctSequence);
+
+            if (isCorrect) {
+                resDiv.className = "bg-green-50 p-6 rounded-lg border-2 border-green-500 flex flex-col justify-center items-center text-center";
+                resDiv.innerHTML = `
+                    <div class="text-6xl mb-4">âœ…</div>
+                    <h3 class="text-xl font-bold text-green-700">EnvÃ­o Aceptado</h3>
+                    <p class="text-sm text-green-600 mt-2">El sobre cumple con la estricta normativa SOAP de VeriFactu.</p>
+                `;
+            } else {
+                resDiv.className = "bg-red-50 p-6 rounded-lg border-2 border-red-500 flex flex-col justify-center items-center text-center";
+                resDiv.innerHTML = `
+                    <div class="text-6xl mb-4">ðŸš«</div>
+                    <h3 class="text-xl font-bold text-red-700">Rechazo BurocrÃ¡tico</h3>
+                    <p class="text-sm text-red-600 mt-2">Error de formato. El servidor no leerÃ¡ el contenido.<br>Orden esperado: Header > Security > Signature.</p>
+                `;
+            }
+        }
+
+    </script>
+</body>
+</html>

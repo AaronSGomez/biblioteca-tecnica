@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio técnico de documentación, arquitectura y despliegue alrededor de Raspberry Pi, Docker y APIs.">
+    <title>Biblioteca técnica | PI5SERVER</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .portfolio-intro {
+            max-width: 900px;
+            margin: 0 auto 30px;
+            padding: 24px;
+            color: #334155;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.08);
+        }
+
+        .portfolio-intro h2 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        .portfolio-intro p {
+            line-height: 1.6;
+        }
+
+        .portfolio-intro .notice {
+            padding: 12px 16px;
+            border-left: 4px solid #f59e0b;
+            background: #fffbeb;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Biblioteca Técnica</h1>
+        <p>Documentación y trabajos realizados en PI5SERVER</p>
+    </header>
+
+    <main class="container">
+        <section class="portfolio-intro">
+            <h2>Portfolio de infraestructura y desarrollo</h2>
+            <p>
+                Este repositorio reúne guías, decisiones de arquitectura y páginas interactivas
+                creadas durante la experimentación con Raspberry Pi, Docker, proxies inversos,
+                seguridad perimetral, Spring Boot y VeriFactu.
+            </p>
+            <p class="notice">
+                <strong>Nota:</strong> la Raspberry Pi está actualmente apagada y fuera de servicio.
+                Los nombres de dominio, tokens, contraseñas, certificados y claves de los ejemplos
+                son placeholders y nunca deben sustituirse por secretos reales en Git.
+            </p>
+        </section>
+
+        <a href="docs/verifactu.html" class="app-card card-docs">
+            <div>
+                <div class="app-title">VeriFactu INFO</div>
+                <div class="app-desc">Guía interactiva sobre SOAP, XML, firma digital y librerías Dart.</div>
+            </div>
+            <div class="tech-tags"><span class="tag">VeriFactu</span><span class="tag">Flutter</span></div>
+        </a>
+
+        <a href="docs/springbootAPI.html" class="app-card card-docs">
+            <div>
+                <div class="app-title">Informe Backend</div>
+                <div class="app-desc">Arquitectura, flujo fiscal, resiliencia y despliegue del backend.</div>
+            </div>
+            <div class="tech-tags"><span class="tag">Spring Boot</span><span class="tag">API</span></div>
+        </a>
+
+        <a href="docs/springboot.html" class="app-card card-docs">
+            <div>
+                <div class="app-title">Arquitectura Spring Boot</div>
+                <div class="app-desc">Diseño del backend intermedio para traducir JSON a SOAP/XML firmado.</div>
+            </div>
+            <div class="tech-tags"><span class="tag">Java</span><span class="tag">Docker</span></div>
+        </a>
+
+        <a href="docs/dokerizacion.html" class="app-card card-docs">
+            <div>
+                <div class="app-title">Odoo Dockerizado</div>
+                <div class="app-desc">Persistencia, PostgreSQL, Apache Reverse Proxy y SSL/TLS.</div>
+            </div>
+            <div class="tech-tags"><span class="tag">Odoo</span><span class="tag">Docker Compose</span></div>
+        </a>
+
+        <a href="docs/duckdnsyssl.html" class="app-card card-docs">
+            <div>
+                <div class="app-title">Multi-dominio y SSL</div>
+                <div class="app-desc">DuckDNS, actualización de IP, VirtualHosts y Let's Encrypt.</div>
+            </div>
+            <div class="tech-tags"><span class="tag">DuckDNS</span><span class="tag">Apache</span></div>
+        </a>
+
+        <a href="docs/nginx.html" class="app-card card-docs">
+            <div>
+                <div class="app-title">Búnker Nginx</div>
+                <div class="app-desc">Aislamiento de backend, rate limiting, timeouts y trazabilidad.</div>
+            </div>
+            <div class="tech-tags"><span class="tag">Nginx</span><span class="tag">Seguridad</span></div>
+        </a>
+
+        <a href="docs/securefirewall.html" class="app-card card-docs">
+            <div>
+                <div class="app-title">CrowdSec y Firewall Bouncer</div>
+                <div class="app-desc">Detección de amenazas y bloqueo a nivel de red.</div>
+            </div>
+            <div class="tech-tags"><span class="tag">CrowdSec</span><span class="tag">Firewall</span></div>
+        </a>
+    </main>
+
+    <footer>
+        <p>Portfolio técnico de <strong>AaronSGomez</strong> &copy; 2026</p>
+        <p>Documentación estática preparada para GitHub Pages</p>
+    </footer>
+</body>
+</html>

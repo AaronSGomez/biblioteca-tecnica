@@ -1,0 +1,147 @@
+:root {
+  --bg-color: #f4f7f6;
+  --text-main: #2c3e50;
+  --card-bg: #ffffff;
+  --primary: #6c4ef0;
+  --hover-color: #f8f9fa;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Cabecera */
+header {
+  background-color: var(--text-main);
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5em;
+  letter-spacing: 1px;
+}
+
+header p {
+  margin-top: 10px;
+  color: #a8b8d0;
+  font-size: 1.1em;
+}
+
+/* Contenedor Principal (Grid) */
+.container {
+  flex: 1;
+  max-width: 1000px;
+  margin: 50px auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Tarjetas de Aplicación */
+.app-card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 30px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text-main);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-top: 5px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.app-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Colores de Borde por App */
+.card-odoo {
+  border-top-color: #714b67;
+}
+
+.card-java {
+  border-top-color: #b07219;
+}
+
+.card-docs {
+  border-top-color: #2196f3;
+}
+
+.app-icon {
+  font-size: 3.5em;
+  margin-bottom: 20px;
+  color: var(--text-main);
+}
+
+.card-odoo .app-icon {
+  color: #714b67;
+}
+
+.card-java .app-icon {
+  color: #b07219;
+}
+
+.card-docs .app-icon {
+  color: #2196f3;
+}
+
+.app-title {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.app-desc {
+  font-size: 0.95em;
+  color: #666;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+/* Etiquetas de Tecnologia */
+.tech-tags {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background-color: #e9ecef;
+  color: #495057;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75em;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 25px;
+  background-color: var(--text-main);
+  color: #8a9ba8;
+  font-size: 0.9em;
+}
+
+footer strong {
+  color: white;
+}

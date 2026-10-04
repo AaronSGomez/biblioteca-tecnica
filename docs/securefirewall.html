@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdSec & Firewall Bouncer</title>
+    <link rel="stylesheet" href="../css/paginas.css">
+</head>
+<body>
+
+<div class="document-page">
+
+    <h1><span class="badge">Seguridad</span> InstalaciÃ³n de CrowdSec y Firewall Bouncer</h1>
+    
+    <p>Esta guÃ­a detalla los pasos para implementar una arquitectura de seguridad hÃ­brida: el motor de detecciÃ³n de CrowdSec funcionando como contenedor Docker para auditar los logs de Nginx, y el Bouncer operando de forma nativa en el sistema operativo para bloquear amenazas a nivel de red (Firewall).</p>
+
+    <h2>1. ConfiguraciÃ³n del MÃ³dulo en Docker</h2>
+    <p>El primer paso es aÃ±adir el motor de CrowdSec a nuestra infraestructura Docker y etiquetar el contenedor de Nginx para que sea auditado automÃ¡ticamente.</p>
+
+    <h3>Modificaciones en <code>docker-compose.yml</code></h3>
+    <p>AÃ±ade las etiquetas a tu servicio web existente e incorpora el servicio de CrowdSec. Solo se muestra el cÃ³digo relevante a modificar:</p>
+
+    <div class="file-header">docker-compose.yml (Fragmento de Seguridad)</div>
+<pre class="file-content">
+services:
+  nginx:
+    # ... (tu configuraciÃ³n existente de nginx) ...
+    labels:
+      - "crowdsec.enable=true"
+      - "crowdsec.type=nginx"
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    environment:
+      - COLLECTIONS=crowdsecurity/nginx crowdsecurity/http-cve
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - crowdsec-db:/var/lib/crowdsec/data/
+      - crowdsec-config:/etc/crowdsec/
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: always
+
+volumes:
+  # ... (tus volÃºmenes existentes) ...
+  crowdsec-db:
+  crowdsec-config:
+</pre>
+
+    <p>Levanta la nueva configuraciÃ³n para aplicar los cambios y generar el motor de seguridad:</p>
+
+    <div class="terminal">
+        <span class="comment"># Recrear contenedores en segundo plano</span><br>
+        <span class="cmd">docker compose up -d</span>
+    </div>
+
+    <h2>2. GeneraciÃ³n de API Key para el Bouncer</h2>
+    <p>El Bouncer (host) necesita permisos para consultar la lista negra del motor (Docker). Generaremos una clave Ãºnica desde el contenedor:</p>
+
+    <div class="terminal">
+        <span class="comment"># Crear identificador para el bouncer del firewall</span><br>
+        <span class="cmd">docker exec -t crowdsec cscli bouncers add portero-firewall</span>
+    </div>
+
+    <div class="note">
+        <strong>Importante:</strong> Guarda la clave alfanumÃ©rica que te devuelve este comando. No se volverÃ¡ a mostrar y la necesitarÃ¡s en el Paso 4.
+    </div>
+
+    <h2>3. InstalaciÃ³n del Bouncer en el Host</h2>
+    <p>Saliendo de Docker, instalaremos el paquete nativo que gestionarÃ¡ las reglas de red (iptables/nftables) de la mÃ¡quina host.</p>
+
+    <div class="terminal">
+        <span class="comment"># AÃ±adir el repositorio oficial de CrowdSec</span><br>
+        <span class="cmd">curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.deb.sh | sudo bash</span><br><br>
+        <span class="comment"># Instalar el paquete de integraciÃ³n con el firewall</span><br>
+        <span class="cmd">sudo apt install -y crowdsec-firewall-bouncer</span>
+    </div>
+
+    <h2>4. VinculaciÃ³n y Puesta en Marcha</h2>
+    <p>Editaremos la configuraciÃ³n del Bouncer reciÃ©n instalado para inyectar la clave generada en el paso 2 y apuntar al motor local de Docker.</p>
+
+    <div class="terminal">
+        <span class="comment"># Editar el archivo de configuraciÃ³n nativo</span><br>
+        <span class="cmd">sudo nano /etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml</span>
+    </div>
+
+    <p>Busca los siguientes parÃ¡metros y reemplaza los valores de forma estÃ¡tica (sin utilizar sintaxis de variables de entorno):</p>
+
+    <div class="file-header">/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml</div>
+<pre class="file-content">
+api_url: http://127.0.0.1:8080/
+api_key: PEGA_TU_CLAVE_AQUI
+</pre>
+
+    <p>Finalmente, habilita el servicio para que inicie con el sistema y reinÃ­cialo para aplicar los cambios:</p>
+
+    <div class="terminal">
+        <span class="comment"># Aplicar nueva configuraciÃ³n y arranque automÃ¡tico</span><br>
+        <span class="cmd">sudo systemctl restart crowdsec-firewall-bouncer</span><br>
+        <span class="cmd">sudo systemctl enable crowdsec-firewall-bouncer</span><br><br>
+        <span class="comment"># Comprobar el estado del servicio</span><br>
+        <span class="cmd">sudo systemctl status crowdsec-firewall-bouncer</span>
+    </div>
+
+    <div class="footer">
+        DocumentaciÃ³n Interna - MÃ³dulo de Seguridad Perimetral
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,157 @@
+        /* =========================================
+           ESTILOS FUSIONADOS (GUÍA ODOO + NUEVOS)
+           ========================================= */
+
+        /* Estilos generales tipo Documento */
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          background-color: #f0f2f5;
+          margin: 0;
+          padding: 20px;
+        }
+
+        .document-page {
+          max-width: 850px;
+          margin: 0 auto;
+          background-color: white;
+          padding: 50px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+        }
+
+        h1 {
+          color: #2c3e50;
+          border-bottom: 2px solid #714b67;
+          /* Color Odoo */
+          padding-bottom: 10px;
+        }
+
+        h2 {
+          color: #714b67;
+          margin-top: 40px;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 10px;
+        }
+
+        h3 {
+          color: #444;
+          margin-top: 25px;
+          font-weight: 600;
+          font-size: 1.1em;
+        }
+
+        p,
+        li {
+          font-size: 16px;
+        }
+
+        ul {
+          list-style-type: square;
+          color: #555;
+        }
+
+        /* Etiquetas de estado (Adaptado al nuevo estilo) */
+        .badge {
+          display: inline-block;
+          padding: 0.25em 0.6em;
+          font-size: 75%;
+          font-weight: 700;
+          line-height: 1;
+          text-align: center;
+          white-space: nowrap;
+          vertical-align: baseline;
+          border-radius: 4px;
+          color: #fff;
+          background-color: #714b67;
+          /* Morado Odoo para consistencia */
+          margin-right: 5px;
+        }
+
+        /* Estilos para simular la Terminal */
+        .terminal {
+          background-color: #1e1e1e;
+          color: #d4d4d4;
+          padding: 20px;
+          border-radius: 6px;
+          font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+          font-size: 14px;
+          overflow-x: auto;
+          margin: 15px 0;
+          border-left: 5px solid #4caf50;
+          /* Línea verde indicando "runnable" */
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .cmd {
+          color: #fff;
+          font-weight: bold;
+        }
+
+        .cmd::before {
+          content: "$ ";
+          color: #4caf50;
+        }
+
+        .comment {
+          color: #6a9955;
+          font-style: italic;
+          display: block;
+          margin-top: 10px;
+          margin-bottom: 2px;
+        }
+
+        /* Estilos para ficheros de configuración */
+        .file-header {
+          background-color: #444;
+          color: #fff;
+          padding: 5px 15px;
+          font-size: 13px;
+          font-family: monospace;
+          border-top-left-radius: 4px;
+          border-top-right-radius: 4px;
+          margin-top: 20px;
+          display: inline-block;
+        }
+
+        .file-content {
+          background-color: #fffff0;
+          /* Fondo amarillo pálido */
+          border: 1px solid #ccc;
+          padding: 15px;
+          font-family: 'Consolas', 'Monaco', monospace;
+          font-size: 14px;
+          color: #333;
+          border-left: 5px solid #6c4ef0;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          border-radius: 0 4px 4px 4px;
+          /* Redondeo excepto arriba izquierda */
+          margin-top: 0;
+          /* Pegado al header */
+        }
+
+        .note {
+          background-color: #e8f4fd;
+          border-left: 4px solid #2196f3;
+          padding: 15px;
+          margin: 15px 0;
+          border-radius: 0 4px 4px 0;
+        }
+
+        /* Footer */
+        .footer {
+          margin-top: 50px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+          font-size: 0.8em;
+          color: #888;
+          text-align: center;
+        }
+
+        /* Ajuste para Mermaid en fondo claro */
+        .mermaid {
+          text-align: center;
+          margin: 30px 0;
+        }

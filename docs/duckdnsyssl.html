@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Dominio y Proxy Inverso FREE</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../css/paginas.css">
+</head>
+<body>
+
+<div class="document-page">
+
+    <h1>GuÃ­a Paso a Paso: Servidor Multi-Dominio con DuckDNS y Apache</h1>
+    <p>
+        <span class="badge">DuckDNS</span>
+        <span class="badge">Apache2</span>
+        <span class="badge">Docker</span>
+        <span class="badge">SSL/Let's Encrypt</span>
+    </p>
+
+    <div class="note">
+        <strong>Objetivo de esta guÃ­a:</strong> Explicar desde cero cÃ³mo registrar dominios gratuitos, automatizar la actualizaciÃ³n de la IP pÃºblica sin depender del router, y enrutar correctamente el trÃ¡fico web hacia contenedores Docker independientes utilizando Apache como Proxy Inverso. Ideal para laboratorios caseros y portfolios.
+    </div>
+
+    <h2>1. Registro de Dominios en DuckDNS</h2>
+    <p>DuckDNS es un servicio de DNS DinÃ¡mico (DDNS) gratuito y sin caducidad mensual. Para empezar, necesitamos vincular nuestra IP pÃºblica a nombres de dominio legibles.</p>
+    
+    <ol>
+        <li><strong>Acceso:</strong> Entra en <a href="https://www.duckdns.org" target="_blank">duckdns.org</a>.</li>
+        <li><strong>AutenticaciÃ³n Segura:</strong> Inicia sesiÃ³n utilizando un proveedor OAuth. <strong>Recomendamos encarecidamente usar GitHub</strong> para mantener tu infraestructura vinculada a tu perfil de desarrollador y garantizar un acceso seguro con autenticaciÃ³n en dos pasos (2FA).</li>
+        <li><strong>LÃ­mites:</strong> Una cuenta gratuita te permite registrar hasta <strong>5 dominios (subdominios de .duckdns.org)</strong>.</li>
+        <li><strong>CreaciÃ³n:</strong> En la casilla "sub domain", escribe el nombre deseado y pulsa "add domain". Para esta arquitectura crearemos tres dominios de ejemplo:
+            <ul>
+                <li><code>miproyecto-web.duckdns.org</code> (Para nuestro Dashboard web HTML).</li>
+                <li><code>miproyecto-erp.duckdns.org</code> (Para nuestro contenedor de Odoo).</li>
+                <li><code>miproyecto-api.duckdns.org</code> (Para nuestra futura API de Spring Boot).</li>
+            </ul>
+        </li>
+        <li><strong>El Token de Seguridad:</strong> En la parte superior de la pÃ¡gina principal, verÃ¡s un campo llamado <strong>Token</strong> (una cadena larga de nÃºmeros y letras, ej. <code>a1b2c3d4...</code>). CÃ³pialo; es la clave maestra que usarÃ¡ nuestro servidor para identificarse.</li>
+    </ol>
+
+    <h2>2. Entendiendo el Proxy Inverso y los Puertos (Localhost)</h2>
+    <p>Â¿Por quÃ© usamos direcciones como <code>localhost:8069</code> en nuestra configuraciÃ³n? La respuesta estÃ¡ en la contenedorizaciÃ³n (Docker).</p>
+    
+    <div class="warning">
+        <strong>Concepto Clave:</strong> Cuando desplegamos una aplicaciÃ³n en Docker, esta se ejecuta de forma aislada. Odoo, por defecto, escucha en el puerto <strong>8069</strong> dentro de su contenedor. Spring Boot escucha en el <strong>8080</strong>.
+    </div>
+    
+    <p>A travÃ©s de Docker, "mapeamos" esos puertos internos hacia nuestro servidor host (<code>localhost</code>). Como no es seguro ni estÃ©tico obligar al usuario final a escribir nÃºmeros de puerto en su navegador, colocamos un <strong>Proxy Inverso (Apache)</strong> en la puerta principal (puertos 80/443). Apache recibe el trÃ¡fico de los dominios limpios y lo redirige internamente al puerto de <code>localhost</code> correspondiente.</p>
+    
+    <div class="mermaid">
+        graph LR
+        User((Cliente Web)) -- HTTPS/443 --> Apache[Apache Reverse Proxy]
+        
+        subgraph "Servidor Host (Linux)"
+            Apache -- miproyecto-web.duckdns.org --> HTML[Directorio Web /var/www/html]
+            Apache -- miproyecto-erp.duckdns.org --> Odoo[Docker Odoo :8069]
+            Apache -- miproyecto-api.duckdns.org --> Java[Docker Spring Boot :8080]
+        end
+        
+        style Apache fill:#ffecb3,stroke:#fbc02d,stroke-width:2px
+        style HTML fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+        style Odoo fill:#e1bee7,stroke:#714b67,stroke-width:2px
+        style Java fill:#ffcc80,stroke:#e65100,stroke-width:2px
+    </div>
+
+    <h2>3. AutomatizaciÃ³n de la IP (Script Cron)</h2>
+    <p>Dado que muchos routers bloquean o no incluyen la opciÃ³n de configurar DuckDNS nativamente, configuraremos el propio servidor Linux para que actualice la IP pÃºblica automÃ¡ticamente cada 5 minutos.</p>
+    
+    <div class="terminal">
+        <span class="comment"># 1. Crear directorio y script de actualizaciÃ³n</span>
+        <div class="cmd">mkdir ~/duckdns && cd ~/duckdns</div>
+        <div class="cmd">nano duck.sh</div>
+
+        <span class="comment"># Contenido del script (Sustituye los dominios y pon tu Token de la web):</span>
+        <span class="comment"># echo url="https://www.duckdns.org/update?domains=miproyecto-web,miproyecto-erp,miproyecto-api&token=TU_TOKEN_SECRETO&ip=" | curl -k -o ~/duckdns/duck.log -K -</span>
+
+        <span class="comment"># 2. Dar permisos de ejecuciÃ³n al script</span>
+        <div class="cmd">chmod 700 duck.sh</div>
+
+        <span class="comment"># 3. AÃ±adir a Cron para que se ejecute silenciosamente cada 5 minutos</span>
+        <div class="cmd">crontab -e</div>
+        <span class="comment"># AÃ±ade esta lÃ­nea al final del archivo:</span>
+        <span class="comment"># */5 * * * * ~/duckdns/duck.sh >/dev/null 2>&1</span>
+    </div>
+
+    <h3>3.1. VerificaciÃ³n de ConexiÃ³n (Logs)</h3>
+    <p>Una vez creado el script y programada la tarea, es fundamental realizar una prueba manual para comprobar que nuestro servidor se estÃ¡ comunicando correctamente con DuckDNS.</p>
+    
+    <div class="terminal">
+        <span class="comment"># 1. Ejecutamos el script manualmente por primera vez</span>
+        <div class="cmd">~/duckdns/duck.sh</div>
+
+        <span class="comment"># 2. Leemos la respuesta guardada en el archivo log</span>
+        <div class="cmd">cat ~/duckdns/duck.log</div>
+    </div>
+
+    <div class="note" style="border-left-color: #4caf50;">
+        <strong>âœ… Si el log responde "OK":</strong> Â¡Ã‰xito absoluto! Tu IP pÃºblica se ha sincronizado correctamente. El servidor ya es autÃ³nomo y mantendrÃ¡ tus dominios actualizados en segundo plano.
+    </div>
+
+    <div class="warning" style="border-left-color: #f44336; background-color: #ffebee;">
+        <strong>âŒ Si el log responde "KO":</strong> La peticiÃ³n ha sido rechazada por DuckDNS. Pasos para solucionarlo:
+        <ul>
+            <li>Abre tu script (<code>nano ~/duckdns/duck.sh</code>) y verifica que el <strong>Token</strong> sea exactamente igual al de tu cuenta.</li>
+            <li>Comprueba que los nombres de los dominios (<code>domains=...</code>) estÃ©n separados Ãºnicamente por comas y sin espacios.</li>
+            <li>AsegÃºrate de que no te falte ninguna comilla (<code>"</code>) en la estructura del comando.</li>
+        </ul>
+    </div>
+
+    <h2>4. ConfiguraciÃ³n de VirtualHosts en Apache</h2>
+    <p>Debemos crear un archivo de configuraciÃ³n para cada servicio en <code>/etc/apache2/sites-available/</code>.</p>
+
+    <h3>4.1. Dashboard Principal (PÃ¡gina EstÃ¡tica HTML)</h3>
+    <div class="file-header">ðŸ“„ /etc/apache2/sites-available/000-default.conf</div>
+    <div class="file-content">&lt;VirtualHost *:80&gt;
+    ServerName miproyecto-web.duckdns.org
+    DocumentRoot /var/www/html
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+&lt;/VirtualHost&gt;</div>
+
+    <h3>4.2. Contenedor de Odoo</h3>
+    <div class="file-header">ðŸ“„ /etc/apache2/sites-available/odoo-docker.conf</div>
+    <div class="file-content">&lt;VirtualHost *:80&gt;
+    ServerName miproyecto-erp.duckdns.org
+
+    ProxyPreserveHost On
+    ProxyRequests Off
+    # RedirecciÃ³n al puerto local expuesto por Docker
+    ProxyPass / http://localhost:8069/
+    ProxyPassReverse / http://localhost:8069/
+    
+    RequestHeader set "X-Forwarded-Proto" "https"
+&lt;/VirtualHost&gt;</div>
+
+    <h3>4.3. Contenedor de Spring Boot (API Java)</h3>
+    <div class="file-header">ðŸ“„ /etc/apache2/sites-available/api-spring.conf</div>
+    <div class="file-content">&lt;VirtualHost *:80&gt;
+    ServerName miproyecto-api.duckdns.org
+
+    ProxyPreserveHost On
+    ProxyRequests Off
+    # RedirecciÃ³n al puerto local expuesto por Docker
+    ProxyPass / http://localhost:8080/
+    ProxyPassReverse / http://localhost:8080/
+    
+    RequestHeader set "X-Forwarded-Proto" "https"
+&lt;/VirtualHost&gt;</div>
+
+    <h2>5. ActivaciÃ³n y Seguridad SSL (HTTPS)</h2>
+    <p>Finalmente, activamos los sitios y utilizamos Let's Encrypt mediante Certbot para generar certificados de seguridad gratuitos, forzando la redirecciÃ³n de todo el trÃ¡fico a HTTPS.</p>
+
+    <div class="terminal">
+        <span class="comment"># 1. Habilitar sitios y recargar Apache</span>
+        <div class="cmd">sudo a2ensite odoo-docker.conf api-spring.conf</div>
+        <div class="cmd">sudo systemctl reload apache2</div>
+
+        <span class="comment"># 2. Generar certificados SSL (Elige "Redireccionar" cuando pregunte)</span>
+        <div class="cmd">sudo certbot --apache -d miproyecto-web.duckdns.org</div>
+        <div class="cmd">sudo certbot --apache -d miproyecto-erp.duckdns.org</div>
+        <div class="cmd">sudo certbot --apache -d miproyecto-api.duckdns.org</div>
+    </div>
+
+    <h2>6. PreparaciÃ³n del Entorno (VS Code Remote SSH)</h2>
+    <p>Para poder editar el cÃ³digo de nuestro Dashboard directamente desde Visual Studio Code sin problemas de permisos (evitando usar <code>sudo</code>), ajustamos la propiedad de la carpeta web.</p>
+
+    <div class="terminal">
+        <span class="comment"># Otorgar propiedad del directorio al usuario activo, manteniendo al grupo de Apache (www-data)</span>
+        <div class="cmd">sudo chown -R $USER:www-data /var/www/html</div>
+
+        <span class="comment"># Establecer permisos: Lectura/Escritura para el dueÃ±o y grupo; solo lectura para otros</span>
+        <div class="cmd">sudo chmod -R 775 /var/www/html</div>
+    </div>
+
+    <div class="note" style="border-left-color: #ff9800; background-color: #fff3e0; color: #e65100;">
+        <strong>âš ï¸ Nota de Seguridad para ProducciÃ³n:</strong> Los permisos <code>775</code> son ideales para entornos de desarrollo y laboratorios caseros, ya que permiten editar archivos fÃ¡cilmente. En un entorno de producciÃ³n empresarial estricto, se utilizarÃ­a <code>755</code> o <code>644</code> para evitar que un posible compromiso del usuario <code>www-data</code> permita alterar el cÃ³digo fuente.
+    </div>
+
+    <div class="footer">
+        DocumentaciÃ³n de Infraestructura generada para Portfolio TÃ©cnico.
+    </div>
+
+</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'neutral',
+        flowchart: { curve: 'basis' }
+    });
+</script>
+
+</body>
+</html>
