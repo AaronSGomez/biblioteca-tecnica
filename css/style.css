@@ -101,6 +101,22 @@ header h1 {
   justify-content: space-between;
 }
 
+.app-card:not(.portfolio-card) {
+  min-height: 270px;
+  box-sizing: border-box;
+}
+
+.app-card:not(.portfolio-card) .app-title {
+  min-height: 2.4em;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.app-card:not(.portfolio-card) .app-desc {
+  min-height: 4.5em;
+}
+
 .portfolio-card {
   grid-column: 1 / -1;
   border-top-color: #f59e0b;
@@ -164,6 +180,10 @@ header h1 {
 }
 
 @media (max-width: 600px) {
+  .app-card:not(.portfolio-card) {
+    min-height: 240px;
+  }
+
   .portfolio-card {
     padding: 26px 24px;
   }
