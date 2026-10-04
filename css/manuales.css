@@ -1,0 +1,109 @@
+/* Capa visual común para manuales interactivos */
+.manual-app {
+  background: #f0f2f5;
+  color: #333;
+  min-height: 100vh;
+}
+
+.manual-app > header {
+  background: #ffffff !important;
+  border-bottom: 3px solid #714b67 !important;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.12) !important;
+  color: #2c3e50 !important;
+}
+
+.manual-app > header h1,
+.manual-app > header h2,
+.manual-app > header h3 {
+  color: #2c3e50 !important;
+}
+
+.manual-app > header p {
+  color: #714b67 !important;
+}
+
+.manual-app aside {
+  background: #ffffff !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 2px 0 8px rgba(44, 62, 80, 0.06) !important;
+}
+
+.manual-app aside h1,
+.manual-app aside h2,
+.manual-app aside h3 {
+  color: #2c3e50 !important;
+}
+
+.manual-app aside p {
+  color: #6b7280 !important;
+}
+
+.manual-app aside button {
+  color: #4b5563 !important;
+}
+
+.manual-app aside .active-nav {
+  background: #f4edf2 !important;
+  color: #714b67 !important;
+  border-right-color: #714b67 !important;
+}
+
+.manual-app #main-content {
+  background: #f0f2f5 !important;
+}
+
+.manual-app #main-content > section > div,
+.manual-app #main-content > section > article,
+.manual-app #main-content .bg-white {
+  border-color: #e1e5e9 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 15px rgba(44, 62, 80, 0.08) !important;
+}
+
+.manual-app #main-content h1,
+.manual-app #main-content h2 {
+  color: #2c3e50 !important;
+}
+
+.manual-app #main-content h2 {
+  border-bottom: 1px solid #eeeeee;
+  padding-bottom: 10px;
+}
+
+.manual-app #main-content h3 {
+  color: #714b67 !important;
+}
+
+.manual-app #main-content .text-slate-600,
+.manual-app #main-content .text-gray-600 {
+  color: #536273 !important;
+}
+
+.manual-app #main-content .border-green-500 {
+  border-color: #714b67 !important;
+}
+
+.manual-app #main-content .text-green-600,
+.manual-app #main-content .text-blue-800 {
+  color: #714b67 !important;
+}
+
+.manual-app #main-content .bg-slate-50 {
+  background: #fafafa !important;
+}
+
+.manual-app #main-content .code-block {
+  border-left-color: #714b67;
+}
+
+@media (max-width: 767px) {
+  .manual-app {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .manual-app #main-content {
+    min-height: 100vh;
+  }
+}
