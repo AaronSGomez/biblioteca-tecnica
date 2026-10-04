@@ -104,11 +104,78 @@ header h1 {
 .portfolio-card {
   grid-column: 1 / -1;
   border-top-color: #f59e0b;
+  padding: 34px 42px;
+  text-align: left;
+}
+
+.portfolio-content {
+  max-width: 860px;
+}
+
+.portfolio-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.portfolio-eyebrow {
+  color: #d97706;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+
+.portfolio-heading h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+  line-height: 1.2;
+}
+
+.portfolio-description {
+  max-width: 780px;
+  color: #536273;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.portfolio-description p {
+  margin: 0;
+}
+
+.portfolio-notice {
+  margin-top: 18px !important;
+  padding: 12px 16px;
+  color: #7c5a12;
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
 }
 
 .app-card.portfolio-card:hover {
   transform: none;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 600px) {
+  .portfolio-card {
+    padding: 26px 24px;
+  }
+
+  .portfolio-heading {
+    display: block;
+  }
+
+  .portfolio-eyebrow {
+    display: block;
+    margin-bottom: 8px;
+  }
 }
 
 .app-card:hover {
